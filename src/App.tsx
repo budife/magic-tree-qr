@@ -262,6 +262,27 @@ export default function App() {
         onKeyDown={onCanvasKey}
       />
 
+      <div className="weather-controls">
+        <button
+          className="weather"
+          type="button"
+          title={weather === 'rain' ? 'Clear' : 'Rain'}
+          aria-pressed={weather === 'rain'}
+          onClick={() => setWeather((w) => w === 'rain' ? 'clear' : 'rain')}
+        >
+          <span>🌧</span>
+        </button>
+        <button
+          className="weather"
+          type="button"
+          title={weather === 'fire' ? 'Clear' : 'Fire'}
+          aria-pressed={weather === 'fire'}
+          onClick={() => setWeather((w) => w === 'fire' ? 'clear' : 'fire')}
+        >
+          <span>🔥</span>
+        </button>
+      </div>
+
       <div className="dock" ref={dockRef}>
         <div className="dock__toast-anchor">
           {toast && <div className="toast">{toast}</div>}
@@ -326,26 +347,6 @@ export default function App() {
               </button>
             );
           })}
-          
-          <button
-            className="weather"
-            type="button"
-            title={weather === 'clear' ? 'Clear' : weather === 'rain' ? 'Rain' : 'Fire'}
-            aria-pressed={weather === 'rain'}
-            onClick={() => setWeather((w) => w === 'rain' ? 'clear' : 'rain')}
-          >
-            <span>🌧</span>
-          </button>
-          <button
-            className="weather"
-            type="button"
-            title={weather === 'fire' ? 'Fire' : 'Fire'}
-            aria-pressed={weather === 'fire'}
-            onClick={() => setWeather((w) => w === 'fire' ? 'clear' : 'fire')}
-          >
-            <span>🔥</span>
-          </button>
-          
           <button
             className="mute"
             type="button"
