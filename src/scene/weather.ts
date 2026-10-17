@@ -12,6 +12,7 @@ const FIRE_KILL_TIME = 10; // seconds to extinguish fire when rain active
 const RAIN_EXTINGUISH_TIME = 20; // seconds for rain to put out the whole fire
 const FIRE_RECOVER_TIME = 10; // seconds for wet zone to dry after rain stops
 const WET_EDGE = 1 / 3; // soft edge width of wet zone (normalized radius)
+const FIRE_SPREAD_TIME = 20; // seconds for fire to spread 30% → 100%
 
 export interface Weather {
   group: THREE.Group;
@@ -32,7 +33,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   let fireIntensity = 0.0; // 0-1, fades in on ignition, fades when rain falls on fire
   let rainIntensity = 0.0; // 0-1, fades in when rain active, fades out when rain off
   let wetProgress = 0.0; // 0-1 over RAIN_EXTINGUISH_TIME, decays over FIRE_RECOVER_TIME when rain stops
-  let fireSpreadTimer = 0.0; // 0-30s, fire spreads across canvas over 30s
+  let fireSpreadTimer = 0.0; // 0-FIRE_SPREAD_TIME, fire spreads across canvas
   let fireKillTimer = 0; // timer for fast extinguish when fire disabled
   let rainActive = false; // independent flag: rain can be ON while fire is ON
 
@@ -151,13 +152,13 @@ export function buildWeather(qr: QrMatrix): Weather {
     const rainTargetIntensity = rainActive ? 1 : 0;
     rainIntensity += (rainTargetIntensity - rainIntensity) * 0.2 * dt * 5; // 0.2 speed = ~5s fade
     
-    // Fire spread timer: 0-30s, controls how far fire spreads across canvas (paused while raining)
+    // Fire spread timer: 0-20s, controls how far fire spreads across canvas (paused while raining)
     if (currentType !== 'fire') {
       fireSpreadTimer = 0; // reset when fire off
-    } else if (!rainActive && fireSpreadTimer < 30) {
+    } else if (!rainActive && fireSpreadTimer < FIRE_SPREAD_TIME) {
       fireSpreadTimer += dt;
     }
-    const spreadRadius = Math.max(0.3, Math.min(fireSpreadTimer / 30, 1)); // 0.3-1 over 30s (start 30% visible)
+    const spreadRadius = Math.max(0.3, Math.min(fireSpreadTimer / FIRE_SPREAD_TIME, 1)); // 0.3-1 over 20s (start 30% visible)
     
     // Rain wet zone: progress 0-1 over 20s, radius = progress × (fire radius + soft edge),
     // so the whole fire (edge included) is out in exactly 20s regardless of fire size.
