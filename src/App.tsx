@@ -52,7 +52,7 @@ export default function App() {
   const [season, setSeason] = useState<SeasonId>('summer');
   const [species, setSpecies] = useState<SpeciesId>('oak');
   const [blossom, setBlossom] = useState<BlossomId>('blush');
-  const [mode, setMode] = useState<ViewMode>('code');
+  const [mode, setMode] = useState<ViewMode>('tree');
   const [muted, setMuted] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -125,6 +125,13 @@ export default function App() {
     const t = window.setTimeout(() => setCommitted(withProtocol || DEFAULT_URL), REBUILD_DELAY);
     return () => window.clearTimeout(t);
   }, [draft]);
+
+  // Auto-switch to QR view when user enters a real link (not default)
+  useEffect(() => {
+    if (committed && committed !== DEFAULT_URL) {
+      setMode('code');
+    }
+  }, [committed]);
 
   useEffect(() => {
     ambienceRef.current = new Ambience();
