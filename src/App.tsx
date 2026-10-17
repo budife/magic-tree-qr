@@ -70,7 +70,7 @@ export default function App() {
   const ambienceRef = useRef<Ambience | null>(null);
 
   const [draft, setDraft] = useState('');
-  const [committed, setCommitted] = useState('');
+  const [committed, setCommitted] = useState(DEFAULT_URL); // start with default to avoid empty→default rebuild
   const [season, setSeason] = useState<SeasonId>(getCurrentSeason());
   const [species, setSpecies] = useState<SpeciesId>(getRandomSpecies());
   const [weather, setWeather] = useState<'clear' | 'rain' | 'fire'>('clear');
