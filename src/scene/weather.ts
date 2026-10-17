@@ -14,6 +14,7 @@ export interface Weather {
   group: THREE.Group;
   update: (dt: number, time: number, visibility: number) => void;
   setType: (type: WeatherType) => void;
+  setRain: (active: boolean) => void;
   setKillTimer: () => void;
   dispose: () => void;
 }
@@ -30,6 +31,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   let rainWetRadius = 0.0; // 0-1, rain extinguishes fire in expanding patches over 20s
   let fireSpreadTimer = 0.0; // 0-30s, fire spreads across canvas over 30s
   let fireKillTimer = 0; // timer for fast extinguish when fire disabled
+  let rainActive = false; // independent flag: rain can be ON while fire is ON
 
   // ---- Rain particles --------------------------------------------------------
   const rainGeo = new THREE.BoxGeometry(0.08, 0.6, 0.08);
@@ -141,8 +143,8 @@ export function buildWeather(qr: QrMatrix): Weather {
     const fireFadeSpeed = 0.25; // smooth ignition 4s
     fireIntensity += (targetFireIntensity - fireIntensity) * fireFadeSpeed * dt * 5;
     
-    // Rain intensity: smooth fade in/out (not instant on/off)
-    const rainTargetIntensity = currentType === 'rain' ? 1 : 0;
+    // Rain intensity: smooth fade in/out (not instant on/off) — independent of fire
+    const rainTargetIntensity = rainActive ? 1 : 0;
     rainIntensity += (rainTargetIntensity - rainIntensity) * 0.2 * dt * 5; // 0.2 speed = ~5s fade
     
     // Fire spread timer: 0-30s, controls how far fire spreads across canvas
@@ -154,9 +156,9 @@ export function buildWeather(qr: QrMatrix): Weather {
     const spreadRadius = Math.max(0.3, Math.min(fireSpreadTimer / 30, 1)); // 0.3-1 over 30s (start 30% visible)
     
     // Rain wet radius: extinguishes fire in expanding patches, but max to current spread radius
-    if (currentType === 'rain' && rainWetRadius < spreadRadius) {
+    if (rainActive && rainWetRadius < spreadRadius) {
       rainWetRadius = Math.min(rainWetRadius + dt / 20, spreadRadius); // grow to fire's spread, max 20s
-    } else if (currentType !== 'rain') {
+    } else if (!rainActive) {
       rainWetRadius = 0; // reset when rain off
     }
     
@@ -207,8 +209,8 @@ export function buildWeather(qr: QrMatrix): Weather {
         // Particle only active if within spread radius
         const particleActive = distFromCenter <= spreadRadius;
         
-        // Rain wet zones: particles within rainWetRadius are extinguished
-        const isWet = currentType === 'rain' && distFromCenter <= rainWetRadius;
+        // Rain wet zones: particles within rainWetRadius are extinguished (independent of fire state)
+        const isWet = rainActive && distFromCenter <= rainWetRadius;
         const wetDamping = isWet ? Math.max(0, 1 - (rainWetRadius - distFromCenter) * 3) : 1; // smooth edge
         
         if (particleActive) {
@@ -305,7 +307,7 @@ export function buildWeather(qr: QrMatrix): Weather {
         smokeMesh.setMatrixAt(i, smokeMatrix);
       }
       
-      smokeMat.opacity = visibility * fireIntensity * 0.25 * (currentType === 'fire' ? 1 : 0.6); // dim smoke when rain
+      smokeMat.opacity = visibility * fireIntensity * 0.25 * (rainActive ? 0.6 : 1); // dim smoke when rain
       smokeMesh.instanceMatrix.needsUpdate = true;
       
       // Embers (flying sparks)
@@ -359,6 +361,10 @@ export function buildWeather(qr: QrMatrix): Weather {
     currentType = type;
   };
 
+  const setRain = (active: boolean) => {
+    rainActive = active;
+  };
+
   const setKillTimer = () => {
     fireKillTimer = FIRE_KILL_TIME;
   };
@@ -376,5 +382,5 @@ export function buildWeather(qr: QrMatrix): Weather {
     emberMat.dispose();
   };
 
-  return { group, update, setType, setKillTimer, dispose };
+  return { group, update, setType, setRain, setKillTimer, dispose };
 }

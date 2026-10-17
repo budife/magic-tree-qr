@@ -238,6 +238,10 @@ export class MagicTreeScene {
     this.weather.setType(type);
   }
 
+  setRain(active: boolean) {
+    this.weather.setRain(active);
+  }
+
   killFire() {
     this.weather.setKillTimer();
   }

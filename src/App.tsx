@@ -133,14 +133,13 @@ export default function App() {
   }, [species]);
 
   useEffect(() => {
-    // Weather logic: fire and rain can both be active (rain extinguishes fire in zones)
+    // Weather logic: fire and rain are independent (both can be ON simultaneously)
     if (fireActive) {
-      sceneRef.current?.setWeather('fire'); // fire always active when button ON
-    } else if (weather === 'rain') {
-      sceneRef.current?.setWeather('rain'); // rain without fire
+      sceneRef.current?.setWeather('fire');
     } else {
       sceneRef.current?.setWeather('clear');
     }
+    sceneRef.current?.setRain(weather === 'rain');
   }, [weather, fireActive]);
 
   // Report the dock's real height so the code is never framed underneath it.
