@@ -11,6 +11,7 @@ export interface Canopy {
   group: THREE.Group;
   leaves: THREE.InstancedMesh;
   branches: THREE.InstancedMesh;
+  fruits?: THREE.InstancedMesh;
   model: TreeModel;
   leafCount: number;
   /** 0 = grown tree, 1 = settled into the code. */
@@ -46,6 +47,54 @@ export function buildCanopy(qr: QrMatrix, palette: Palette, species: Species): C
   branches.instanceMatrix.needsUpdate = true;
   branches.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   group.add(branches);
+
+  // ---- palm fruits (TBS - Tandan Buah Segar) ------------------------------
+  let fruits: THREE.InstancedMesh | undefined;
+  let fruitCount = 0;
+  const fruitPos: number[] = [];
+  const fruitScales: number[] = [];
+
+  if (species.id === 'palm') {
+    // Oil palm fruits hang at whorl junctions (frond bases) on the trunk
+    const whorls = 3; // matches growConifer palm config
+    const canopyBase = treeHeight * 0.92;
+    fruitCount = whorls * 2; // 2 fruit bunches per whorl
+    
+    const fruitGeo = new THREE.SphereGeometry(0.5, 8, 6);
+    const fruitMat = new THREE.MeshLambertMaterial({ color: 0xffaa33 });
+    fruits = new THREE.InstancedMesh(fruitGeo, fruitMat, fruitCount);
+    fruits.castShadow = true;
+    
+    const rngFruit = makeRng(seed ^ 0xffa500);
+    const mat = new THREE.Matrix4();
+    const pos = new THREE.Vector3();
+    const scale = new THREE.Vector3();
+    
+    for (let w = 0; w < whorls; w++) {
+      const f = w / (whorls - 1);
+      const y = canopyBase + (treeHeight - canopyBase) * f;
+      
+      // 2 bunches per whorl, opposite sides
+      for (let side = 0; side < 2; side++) {
+        const idx = w * 2 + side;
+        const angle = side * Math.PI + rngFruit() * 0.6;
+        const offset = 1.8 + rngFruit() * 0.8; // hang from trunk edge
+        const s = 0.7 + rngFruit() * 0.4;
+        
+        pos.set(Math.cos(angle) * offset, y - 0.5, Math.sin(angle) * offset);
+        scale.set(s, s * 1.2, s); // slightly elongated
+        mat.compose(pos, new THREE.Quaternion(), scale);
+        fruits.setMatrixAt(idx, mat);
+        
+        fruitPos.push(pos.x, pos.y, pos.z);
+        fruitScales.push(s);
+      }
+    }
+    
+    fruits.instanceMatrix.needsUpdate = true;
+    fruits.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    group.add(fruits);
+  }
 
   // ---- leaves ----------------------------------------------------------
   const leafGeo = new THREE.BoxGeometry(1, 1, 1);
@@ -229,6 +278,22 @@ export function buildCanopy(qr: QrMatrix, palette: Palette, species: Species): C
     // Once flat, the canopy must not cast anything onto the code.
     leaves.castShadow = !settled;
     setBranchRetraction(t);
+    
+    // Palm fruits fade + shrink during morph
+    if (fruits && fruitCount > 0) {
+      const k = 1 - smoothstep(clamp01(t / 0.5));
+      fruits.visible = k > 0.05;
+      if (fruits.visible) {
+        for (let i = 0; i < fruitCount; i++) {
+          pos.set(fruitPos[i * 3] * k, fruitPos[i * 3 + 1] * k, fruitPos[i * 3 + 2] * k);
+          const s = fruitScales[i] * k;
+          scl.set(s, s * 1.2, s);
+          mat4.compose(pos, quat.identity(), scl);
+          fruits.setMatrixAt(i, mat4);
+        }
+        fruits.instanceMatrix.needsUpdate = true;
+      }
+    }
   };
 
   const dispose = () => {
@@ -236,9 +301,13 @@ export function buildCanopy(qr: QrMatrix, palette: Palette, species: Species): C
     branchMat.dispose();
     leafGeo.dispose();
     leafMat.dispose();
+    if (fruits) {
+      fruits.geometry.dispose();
+      (fruits.material as THREE.Material).dispose();
+    }
   };
 
   applyPalette(palette);
 
-  return { group, leaves, branches, model, leafCount, setMorph, applyPalette, dispose };
+  return { group, leaves, branches, fruits, model, leafCount, setMorph, applyPalette, dispose };
 }
