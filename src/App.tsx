@@ -262,24 +262,31 @@ export default function App() {
         onKeyDown={onCanvasKey}
       />
 
-      <div className="weather-controls">
+      {/* Weather only applies to the tree view, so the toggle fades out with it. */}
+      <div
+        className={`weather-controls${mode === 'code' ? ' weather-controls--hidden' : ''}`}
+        role="group"
+        aria-label="Cuaca"
+      >
         <button
           className="weather"
           type="button"
-          title={weather === 'rain' ? 'Clear' : 'Rain'}
+          title="Hujan"
+          aria-label="Hujan"
           aria-pressed={weather === 'rain'}
-          onClick={() => setWeather((w) => w === 'rain' ? 'clear' : 'rain')}
+          onClick={() => setWeather((w) => (w === 'rain' ? 'clear' : 'rain'))}
         >
-          <span>🌧</span>
+          <span aria-hidden="true">🌧</span>
         </button>
         <button
           className="weather"
           type="button"
-          title={weather === 'fire' ? 'Clear' : 'Fire'}
+          title="Kebakaran"
+          aria-label="Kebakaran"
           aria-pressed={weather === 'fire'}
-          onClick={() => setWeather((w) => w === 'fire' ? 'clear' : 'fire')}
+          onClick={() => setWeather((w) => (w === 'fire' ? 'clear' : 'fire'))}
         >
-          <span>🔥</span>
+          <span aria-hidden="true">🔥</span>
         </button>
       </div>
 

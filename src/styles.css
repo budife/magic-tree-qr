@@ -68,6 +68,19 @@ button { font: inherit; color: inherit; }
   border-radius: var(--radius-pill);
   padding: 6px;
   box-shadow: var(--shadow-soft);
+  /* visibility also drops the buttons from tab order once faded */
+  transition: opacity 0.4s ease, visibility 0.4s;
+}
+
+.weather-controls--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Narrow screens: the brand fills the top-left, so drop below it. */
+@media (max-width: 520px) {
+  .weather-controls { top: calc(62px + env(safe-area-inset-top, 0px)); }
 }
 
 .weather {

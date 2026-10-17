@@ -26,6 +26,8 @@ export class MagicTreeScene {
   private canopy!: Canopy;
   private motes!: Motes;
   private weather!: Weather;
+  /** Survives rebuilds, so changing species or link keeps the chosen weather. */
+  private weatherType: WeatherType = 'clear';
   private qr!: QrMatrix;
   private world = new THREE.Group();
   private target = new THREE.Vector3();
@@ -102,6 +104,7 @@ export class MagicTreeScene {
     this.canopy = buildCanopy(this.qr, this.palette, this.species);
     this.motes = buildMotes(this.qr, this.palette);
     this.weather = buildWeather(this.qr);
+    this.weather.setType(this.weatherType);
     this.world.add(this.plot.group, this.canopy.group, this.motes.points, this.weather.group);
 
     const rim = (this.qr.plot + HEDGE_RING * 2) * CELL;
@@ -231,6 +234,7 @@ export class MagicTreeScene {
   }
 
   setWeather(type: WeatherType) {
+    this.weatherType = type;
     this.weather.setType(type);
   }
 

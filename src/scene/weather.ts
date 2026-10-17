@@ -64,6 +64,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   const pos = new THREE.Vector3();
   const scl = new THREE.Vector3();
   const quat = new THREE.Quaternion();
+  const fireColor = new THREE.Color();
   
   let currentType: WeatherType = 'clear';
 
@@ -117,8 +118,8 @@ export function buildWeather(qr: QrMatrix): Weather {
         
         // Color shift (orange → yellow)
         const heat = Math.min(fireState[o + 2] / 3, 1);
-        const color = new THREE.Color().setHSL(0.08 - heat * 0.05, 0.9, 0.5 + heat * 0.2);
-        fireMesh.setColorAt(i, color);
+        fireColor.setHSL(0.08 - heat * 0.05, 0.9, 0.5 + heat * 0.2);
+        fireMesh.setColorAt(i, fireColor);
         
         fireMatrix.compose(pos, quat.identity(), scl);
         fireMesh.setMatrixAt(i, fireMatrix);
