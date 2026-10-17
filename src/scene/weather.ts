@@ -145,13 +145,6 @@ export function buildWeather(qr: QrMatrix): Weather {
     const rainTargetIntensity = currentType === 'rain' ? 1 : 0;
     rainIntensity += (rainTargetIntensity - rainIntensity) * 0.2 * dt * 5; // 0.2 speed = ~5s fade
     
-    // Rain wet radius: extinguishes fire in expanding patches, but max to current spread radius
-    if (currentType === 'rain' && rainWetRadius < spreadRadius) {
-      rainWetRadius = Math.min(rainWetRadius + dt / 20, spreadRadius); // grow to fire's spread, max 20s
-    } else if (currentType !== 'rain') {
-      rainWetRadius = 0; // reset when rain off
-    }
-    
     // Fire spread timer: 0-30s, controls how far fire spreads across canvas
     if (currentType === 'fire' && fireSpreadTimer < 30) {
       fireSpreadTimer += dt;
@@ -159,6 +152,13 @@ export function buildWeather(qr: QrMatrix): Weather {
       fireSpreadTimer = 0; // reset when fire off
     }
     const spreadRadius = Math.max(0.3, Math.min(fireSpreadTimer / 30, 1)); // 0.3-1 over 30s (start 30% visible)
+    
+    // Rain wet radius: extinguishes fire in expanding patches, but max to current spread radius
+    if (currentType === 'rain' && rainWetRadius < spreadRadius) {
+      rainWetRadius = Math.min(rainWetRadius + dt / 20, spreadRadius); // grow to fire's spread, max 20s
+    } else if (currentType !== 'rain') {
+      rainWetRadius = 0; // reset when rain off
+    }
     
     // Fast kill timer (when fire disabled, 10s to extinguish)
     if (fireKillTimer > 0) {
