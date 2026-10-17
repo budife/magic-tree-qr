@@ -161,23 +161,42 @@ export default function App() {
 
   const share = useCallback(async () => {
     const url = committed;
-    const payload = {
-      title: 'Magic Tree',
-      text: 'A tree that is also a scannable QR code.',
-      url,
-    };
+    
     try {
+      // Try to capture QR image if in code view
+      if (mode === 'code' && sceneRef.current) {
+        const dataUrl = sceneRef.current.snapshot();
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], 'magic-tree-qr.png', { type: 'image/png' });
+        
+        // Try Web Share API with image
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({
+            title: 'Magic Tree QR Code',
+            text: `Scan this tree: ${url}`,
+            files: [file],
+          });
+          return;
+        }
+      }
+      
+      // Fallback: share URL only
       if (navigator.share) {
-        await navigator.share(payload);
+        await navigator.share({
+          title: 'Magic Tree',
+          text: 'A tree that is also a scannable QR code.',
+          url,
+        });
         return;
       }
+      
+      // Final fallback: copy link to clipboard
       await navigator.clipboard.writeText(url);
       setToast('Link copied');
     } catch (err) {
-      // A cancelled share sheet is not a failure worth surfacing.
       if ((err as Error)?.name !== 'AbortError') setToast('Could not share');
     }
-  }, [committed]);
+  }, [committed, mode]);
 
   const onCanvasKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
