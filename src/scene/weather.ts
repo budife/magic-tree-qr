@@ -26,6 +26,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   const ceiling = qr.plot * 0.85;
 
   let fireIntensity = 0.0; // 0-1, fades in on ignition, fades when rain falls on fire
+  let rainIntensity = 0.0; // 0-1, fades in when rain active, fades out when rain off
   let fireSpreadTimer = 0.0; // 0-30s, fire spreads across canvas over 30s
   let fireKillTimer = 0; // timer for fast extinguish when fire disabled
 
@@ -139,6 +140,10 @@ export function buildWeather(qr: QrMatrix): Weather {
     const fadeSpeed = currentType === 'rain' ? 0.1 : 0.25; // rain kills 10s, ignition smooth 4s
     fireIntensity += (targetIntensity - fireIntensity) * fadeSpeed * dt * 5;
     
+    // Rain intensity: smooth fade in/out (not instant on/off)
+    const rainTargetIntensity = currentType === 'rain' ? 1 : 0;
+    rainIntensity += (rainTargetIntensity - rainIntensity) * 0.2 * dt * 5; // 0.2 speed = ~5s fade
+    
     // Fire spread timer: 0-30s, controls how far fire spreads across canvas
     if (currentType === 'fire' && fireSpreadTimer < 30) {
       fireSpreadTimer += dt;
@@ -153,17 +158,17 @@ export function buildWeather(qr: QrMatrix): Weather {
       fireIntensity = Math.max(0, fireKillTimer / FIRE_KILL_TIME); // linear fade from 1 to 0
     }
     
-    rainMesh.visible = weatherVisible && currentType === 'rain';
+    rainMesh.visible = weatherVisible && rainIntensity > 0.02;
     fireCoreMesh.visible = weatherVisible && fireIntensity > 0.02;
     fireOuterMesh.visible = weatherVisible && fireIntensity > 0.02;
     smokeMesh.visible = weatherVisible && fireIntensity > 0.02;
     emberMesh.visible = weatherVisible && fireIntensity > 0.02;
 
-    if (!weatherVisible && fireIntensity < 0.05) return;
+    if (!weatherVisible && fireIntensity < 0.05 && rainIntensity < 0.05) return;
 
     // Rain update
-    if (currentType === 'rain') {
-      rainMat.opacity = 0.7 * visibility;
+    if (rainIntensity > 0.02) {
+      rainMat.opacity = 0.7 * visibility * rainIntensity;
       for (let i = 0; i < RAIN_COUNT; i++) {
         const o = i * 4;
         rainState[o + 2] -= rainState[o + 3] * dt;
