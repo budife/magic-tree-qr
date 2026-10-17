@@ -3,6 +3,7 @@ import { buildQr, type QrMatrix } from './qr';
 import { buildPlot, type PlotMeshes } from './plot';
 import { buildCanopy, type Canopy } from './canopy';
 import { buildMotes, type Motes } from './motes';
+import { buildWeather, type Weather, type WeatherType } from './weather';
 import { CELL, HEDGE_RING, ISO_AZIMUTH, ISO_ELEVATION, TOP_ELEVATION } from './constants';
 import { clamp01, lerp, easeInOutCubic } from './rng';
 import type { Palette } from './palette';
@@ -24,6 +25,7 @@ export class MagicTreeScene {
   private plot!: PlotMeshes;
   private canopy!: Canopy;
   private motes!: Motes;
+  private weather!: Weather;
   private qr!: QrMatrix;
   private world = new THREE.Group();
   private target = new THREE.Vector3();
@@ -99,7 +101,8 @@ export class MagicTreeScene {
     this.plot = buildPlot(this.qr, this.palette);
     this.canopy = buildCanopy(this.qr, this.palette, this.species);
     this.motes = buildMotes(this.qr, this.palette);
-    this.world.add(this.plot.group, this.canopy.group, this.motes.points);
+    this.weather = buildWeather(this.qr);
+    this.world.add(this.plot.group, this.canopy.group, this.motes.points, this.weather.group);
 
     const rim = (this.qr.plot + HEDGE_RING * 2) * CELL;
     this.rimUnits = rim;
@@ -175,9 +178,10 @@ export class MagicTreeScene {
   }
 
   private teardown() {
-    this.world.remove(this.plot.group, this.canopy.group, this.motes.points);
+    this.world.remove(this.plot.group, this.canopy.group, this.motes.points, this.weather.group);
     this.canopy.dispose();
     this.motes.dispose();
+    this.weather.dispose();
     this.plot.group.traverse((o) => {
       const mesh = o as THREE.Mesh;
       mesh.geometry?.dispose();
@@ -224,6 +228,10 @@ export class MagicTreeScene {
 
   setMode(mode: ViewMode) {
     this.morphTarget = mode === 'code' ? 1 : 0;
+  }
+
+  setWeather(type: WeatherType) {
+    this.weather.setType(type);
   }
 
   toggleMode() {
@@ -364,6 +372,7 @@ export class MagicTreeScene {
     const idle = this.morph < 0.999;
     if (idle || this.frame < 2) this.canopy.setMorph(this.morph, time);
     this.motes.update(dt, time, 1 - this.morph);
+    this.weather.update(dt, time, 1 - this.morph);
 
     this.updateCamera();
     this.renderer.render(this.scene, this.camera);

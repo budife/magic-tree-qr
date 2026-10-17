@@ -56,6 +56,7 @@ export default function App() {
   const [committed, setCommitted] = useState('');
   const [season, setSeason] = useState<SeasonId>('summer');
   const [species, setSpecies] = useState<SpeciesId>('oak');
+  const [weather, setWeather] = useState<'clear' | 'rain' | 'fire'>('clear');
   const [blossom, setBlossom] = useState<BlossomId>('blush');
   const [mode, setMode] = useState<ViewMode>('tree');
   const [muted, setMuted] = useState(true);
@@ -109,6 +110,10 @@ export default function App() {
   useEffect(() => {
     sceneRef.current?.setSpecies(species);
   }, [species]);
+
+  useEffect(() => {
+    sceneRef.current?.setWeather(weather);
+  }, [weather]);
 
   // Report the dock's real height so the code is never framed underneath it.
   useEffect(() => {
@@ -321,6 +326,26 @@ export default function App() {
               </button>
             );
           })}
+          
+          <button
+            className="weather"
+            type="button"
+            title={weather === 'clear' ? 'Clear' : weather === 'rain' ? 'Rain' : 'Fire'}
+            aria-pressed={weather === 'rain'}
+            onClick={() => setWeather((w) => w === 'rain' ? 'clear' : 'rain')}
+          >
+            <span>🌧</span>
+          </button>
+          <button
+            className="weather"
+            type="button"
+            title={weather === 'fire' ? 'Fire' : 'Fire'}
+            aria-pressed={weather === 'fire'}
+            onClick={() => setWeather((w) => w === 'fire' ? 'clear' : 'fire')}
+          >
+            <span>🔥</span>
+          </button>
+          
           <button
             className="mute"
             type="button"
