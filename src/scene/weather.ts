@@ -5,7 +5,9 @@ import type { QrMatrix } from './qr';
 export type WeatherType = 'clear' | 'rain' | 'fire';
 
 const RAIN_COUNT = 200;
-const FIRE_COUNT = 400; // upgraded from 250
+const FIRE_COUNT = 500; // core fire particles
+const SMOKE_COUNT = 150; // smoke particles
+const EMBER_COUNT = 80; // flying embers/sparks
 const FIRE_KILL_TIME = 10; // seconds to extinguish fire when rain active
 
 export interface Weather {
@@ -45,27 +47,82 @@ export function buildWeather(qr: QrMatrix): Weather {
     rainState[i * 4 + 3] = 18 + rng() * 8; // fast fall
   }
 
-  // ---- Fire particles --------------------------------------------------------
-  const fireGeo = new THREE.SphereGeometry(1.5, 10, 10); // bigger + smoother (was 1.2, 8, 8)
-  const fireMat = new THREE.MeshBasicMaterial({ 
+  // ---- Fire particles (multi-layer: core + outer flames) ---------------------
+  const fireCoreGeo = new THREE.SphereGeometry(0.8, 8, 8); // inner hot core
+  const fireCoreMat = new THREE.MeshBasicMaterial({ 
+    color: 0xffaa00, 
+    transparent: true,
+  });
+  const fireCoreMesh = new THREE.InstancedMesh(fireCoreGeo, fireCoreMat, FIRE_COUNT);
+  fireCoreMesh.visible = false;
+  group.add(fireCoreMesh);
+
+  const fireOuterGeo = new THREE.SphereGeometry(1.8, 10, 10); // outer cooler flames
+  const fireOuterMat = new THREE.MeshBasicMaterial({ 
     color: 0xff6622, 
     transparent: true,
   });
-  const fireMesh = new THREE.InstancedMesh(fireGeo, fireMat, FIRE_COUNT);
-  fireMesh.visible = false;
-  group.add(fireMesh);
+  const fireOuterMesh = new THREE.InstancedMesh(fireOuterGeo, fireOuterMat, FIRE_COUNT);
+  fireOuterMesh.visible = false;
+  group.add(fireOuterMesh);
 
-  const fireState = new Float32Array(FIRE_COUNT * 5); // x, z, y, riseSpeed, phase
+  // ---- Smoke particles -------------------------------------------------------
+  const smokeGeo = new THREE.SphereGeometry(2.5, 8, 8); // large, soft
+  const smokeMat = new THREE.MeshBasicMaterial({
+    color: 0x222222,
+    transparent: true,
+  });
+  const smokeMesh = new THREE.InstancedMesh(smokeGeo, smokeMat, SMOKE_COUNT);
+  smokeMesh.visible = false;
+  group.add(smokeMesh);
+
+  // ---- Embers (flying sparks) ------------------------------------------------
+  const emberGeo = new THREE.SphereGeometry(0.15, 6, 6);
+  const emberMat = new THREE.MeshBasicMaterial({
+    color: 0xff4400,
+    transparent: true,
+  });
+  const emberMesh = new THREE.InstancedMesh(emberGeo, emberMat, EMBER_COUNT);
+  emberMesh.visible = false;
+  group.add(emberMesh);
+
+  const fireState = new Float32Array(FIRE_COUNT * 6); // x, z, y, riseSpeed, phase, life
   for (let i = 0; i < FIRE_COUNT; i++) {
-    fireState[i * 5] = (rng() - 0.5) * spread * 1.2;
-    fireState[i * 5 + 1] = (rng() - 0.5) * spread * 1.2;
-    fireState[i * 5 + 2] = rng() * 6; // low start, taller reach
-    fireState[i * 5 + 3] = 3.0 + rng() * 4; // faster rise (was 2.5 + rng() * 3)
-    fireState[i * 5 + 4] = rng() * Math.PI * 2; // flicker phase
+    const o = i * 6;
+    fireState[o] = (rng() - 0.5) * spread * 0.8; // tighter fire base
+    fireState[o + 1] = (rng() - 0.5) * spread * 0.8;
+    fireState[o + 2] = rng() * 2; // start low
+    fireState[o + 3] = 4.0 + rng() * 6; // varied rise speed
+    fireState[o + 4] = rng() * Math.PI * 2; // flicker phase
+    fireState[o + 5] = rng(); // life cycle
+  }
+
+  const smokeState = new Float32Array(SMOKE_COUNT * 6); // x, z, y, riseSpeed, phase, life
+  for (let i = 0; i < SMOKE_COUNT; i++) {
+    const o = i * 6;
+    smokeState[o] = (rng() - 0.5) * spread * 1.2;
+    smokeState[o + 1] = (rng() - 0.5) * spread * 1.2;
+    smokeState[o + 2] = 3 + rng() * 8; // start mid-height
+    smokeState[o + 3] = 1.5 + rng() * 2; // slow rise
+    smokeState[o + 4] = rng() * Math.PI * 2;
+    smokeState[o + 5] = rng();
+  }
+
+  const emberState = new Float32Array(EMBER_COUNT * 6); // x, z, y, riseSpeed, phase, life
+  for (let i = 0; i < EMBER_COUNT; i++) {
+    const o = i * 6;
+    emberState[o] = (rng() - 0.5) * spread * 0.6;
+    emberState[o + 1] = (rng() - 0.5) * spread * 0.6;
+    emberState[o + 2] = rng() * 3;
+    emberState[o + 3] = 2.0 + rng() * 5; // varied speeds (some fast pop)
+    emberState[o + 4] = rng() * Math.PI * 2;
+    emberState[o + 5] = rng();
   }
 
   const rainMatrix = new THREE.Matrix4();
   const fireMatrix = new THREE.Matrix4();
+  const smokeMatrix = new THREE.Matrix4();
+  const emberMatrix = new THREE.Matrix4();
   const pos = new THREE.Vector3();
   const scl = new THREE.Vector3();
   const quat = new THREE.Quaternion();
@@ -88,7 +145,10 @@ export function buildWeather(qr: QrMatrix): Weather {
     }
     
     rainMesh.visible = weatherVisible && currentType === 'rain';
-    fireMesh.visible = weatherVisible && fireIntensity > 0.02; // fade out completely
+    fireCoreMesh.visible = weatherVisible && fireIntensity > 0.02;
+    fireOuterMesh.visible = weatherVisible && fireIntensity > 0.02;
+    smokeMesh.visible = weatherVisible && fireIntensity > 0.02;
+    emberMesh.visible = weatherVisible && fireIntensity > 0.02;
 
     if (!weatherVisible && fireIntensity < 0.05) return;
 
@@ -113,37 +173,100 @@ export function buildWeather(qr: QrMatrix): Weather {
 
     // Fire update (always runs to allow fade-out)
     if (fireIntensity > 0.02) {
+      // Core fire (hot inner flames)
       for (let i = 0; i < FIRE_COUNT; i++) {
-        const o = i * 5;
-        fireState[o + 2] += fireState[o + 3] * dt;
-        if (fireState[o + 2] > ceiling * 0.4) {
+        const o = i * 6;
+        fireState[o + 2] += fireState[o + 3] * dt; // rise
+        fireState[o + 5] += dt * 0.8; // life cycle
+        
+        if (fireState[o + 2] > ceiling * 0.5 || fireState[o + 5] > 1) {
           fireState[o + 2] = 0;
-          fireState[o] = (rng() - 0.5) * spread * 1.2;
-          fireState[o + 1] = (rng() - 0.5) * spread * 1.2;
+          fireState[o] = (rng() - 0.5) * spread * 0.8;
+          fireState[o + 1] = (rng() - 0.5) * spread * 0.8;
+          fireState[o + 5] = 0;
         }
         
-        // Flicker and sway (modulated by intensity)
-        const flicker = (Math.sin(time * 10 + fireState[o + 4]) * 0.5 + 1.4) * fireIntensity; // bigger flicker
-        const sway = Math.sin(time * 3 + fireState[o + 4]) * 0.8 * fireIntensity; // more sway
+        const life = fireState[o + 5];
+        const flicker = (Math.sin(time * 12 + fireState[o + 4]) * 0.3 + 0.9) * fireIntensity;
+        const sway = Math.sin(time * 4 + fireState[o + 4]) * 0.5 * fireIntensity;
         
-        pos.set(
-          fireState[o] + sway, 
-          fireState[o + 2], 
-          fireState[o + 1] + sway * 0.5
-        );
-        scl.setScalar(flicker);
+        pos.set(fireState[o] + sway, fireState[o + 2], fireState[o + 1] + sway * 0.4);
+        scl.setScalar(flicker * (1 - life * 0.3)); // shrink as rises
         
-        // Color shift (orange → yellow → white) + dim when fading
-        const heat = Math.min(fireState[o + 2] / 4, 1); // taller ceiling for color shift
-        fireColor.setHSL(0.09 - heat * 0.06, 0.95 * fireIntensity, (0.55 + heat * 0.3) * fireIntensity); // brighter
-        fireMesh.setColorAt(i, fireColor);
-        
+        // Core: yellow-white hot
+        const heat = Math.min(fireState[o + 2] / 5, 1);
+        fireColor.setHSL(0.12 - heat * 0.08, 0.98 * fireIntensity, (0.7 + heat * 0.25) * fireIntensity);
+        fireCoreMesh.setColorAt(i, fireColor);
         fireMatrix.compose(pos, quat.identity(), scl);
-        fireMesh.setMatrixAt(i, fireMatrix);
+        fireCoreMesh.setMatrixAt(i, fireMatrix);
+        
+        // Outer: orange-red cooler
+        scl.setScalar(flicker * 1.8 * (1 - life * 0.2));
+        fireColor.setHSL(0.08 - heat * 0.04, 0.92 * fireIntensity, (0.55 + heat * 0.2) * fireIntensity);
+        fireOuterMesh.setColorAt(i, fireColor);
+        fireMatrix.compose(pos, quat.identity(), scl);
+        fireOuterMesh.setMatrixAt(i, fireMatrix);
       }
-      fireMat.opacity = visibility * fireIntensity; // fade with intensity
-      fireMesh.instanceMatrix.needsUpdate = true;
-      if (fireMesh.instanceColor) fireMesh.instanceColor.needsUpdate = true;
+      
+      fireCoreMat.opacity = visibility * fireIntensity;
+      fireOuterMat.opacity = visibility * fireIntensity * 0.7; // outer more transparent
+      fireCoreMesh.instanceMatrix.needsUpdate = true;
+      fireOuterMesh.instanceMatrix.needsUpdate = true;
+      if (fireCoreMesh.instanceColor) fireCoreMesh.instanceColor.needsUpdate = true;
+      if (fireOuterMesh.instanceColor) fireOuterMesh.instanceColor.needsUpdate = true;
+      
+      // Smoke (rises from fire, darker)
+      for (let i = 0; i < SMOKE_COUNT; i++) {
+        const o = i * 6;
+        smokeState[o + 2] += smokeState[o + 3] * dt;
+        smokeState[o + 5] += dt * 0.4;
+        
+        if (smokeState[o + 2] > ceiling || smokeState[o + 5] > 1) {
+          smokeState[o + 2] = 3 + rng() * 5;
+          smokeState[o] = (rng() - 0.5) * spread * 1.2;
+          smokeState[o + 1] = (rng() - 0.5) * spread * 1.2;
+          smokeState[o + 5] = 0;
+        }
+        
+        const life = smokeState[o + 5];
+        const drift = Math.sin(time * 1.5 + smokeState[o + 4]) * 1.2;
+        
+        pos.set(smokeState[o] + drift, smokeState[o + 2], smokeState[o + 1] + drift * 0.6);
+        scl.setScalar((1.5 + life * 2) * fireIntensity); // grow as rises
+        
+        smokeMatrix.compose(pos, quat.identity(), scl);
+        smokeMesh.setMatrixAt(i, smokeMatrix);
+      }
+      
+      smokeMat.opacity = visibility * fireIntensity * 0.25 * (currentType === 'fire' ? 1 : 0.6); // dim smoke when rain
+      smokeMesh.instanceMatrix.needsUpdate = true;
+      
+      // Embers (flying sparks)
+      for (let i = 0; i < EMBER_COUNT; i++) {
+        const o = i * 6;
+        emberState[o + 2] += emberState[o + 3] * dt;
+        emberState[o + 5] += dt * 1.2;
+        
+        if (emberState[o + 2] > ceiling * 0.6 || emberState[o + 5] > 1) {
+          emberState[o + 2] = 0;
+          emberState[o] = (rng() - 0.5) * spread * 0.6;
+          emberState[o + 1] = (rng() - 0.5) * spread * 0.6;
+          emberState[o + 5] = 0;
+        }
+        
+        const life = emberState[o + 5];
+        const sparkle = Math.sin(time * 20 + emberState[o + 4]) * 0.5 + 0.5;
+        const sway = Math.sin(time * 3 + emberState[o + 4]) * 0.3;
+        
+        pos.set(emberState[o] + sway, emberState[o + 2], emberState[o + 1]);
+        scl.setScalar((1 - life * 0.7) * sparkle * fireIntensity); // fade + twinkle
+        
+        emberMatrix.compose(pos, quat.identity(), scl);
+        emberMesh.setMatrixAt(i, emberMatrix);
+      }
+      
+      emberMat.opacity = visibility * fireIntensity * 0.9;
+      emberMesh.instanceMatrix.needsUpdate = true;
     }
   };
 
@@ -158,8 +281,14 @@ export function buildWeather(qr: QrMatrix): Weather {
   const dispose = () => {
     rainGeo.dispose();
     rainMat.dispose();
-    fireGeo.dispose();
-    fireMat.dispose();
+    fireCoreGeo.dispose();
+    fireCoreMat.dispose();
+    fireOuterGeo.dispose();
+    fireOuterMat.dispose();
+    smokeGeo.dispose();
+    smokeMat.dispose();
+    emberGeo.dispose();
+    emberMat.dispose();
   };
 
   return { group, update, setType, setKillTimer, dispose };
