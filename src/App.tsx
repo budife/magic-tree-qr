@@ -120,15 +120,8 @@ export default function App() {
   useEffect(() => {
     // Weather logic: rain suppresses fire, but fireActive persists
     if (weather === 'rain') {
-      sceneRef.current?.setWeather('rain'); // rain extinguishes fire gradually
-      if (fireActive) {
-        // Rain turns fire off after 10s
-        const timer = setTimeout(() => {
-          setFireActive(false);
-          setFireDisabled(false); // can be turned on again after rain kills it
-        }, 10000);
-        return () => clearTimeout(timer);
-      }
+      sceneRef.current?.setWeather('rain'); // rain extinguishes fire gradually (visual only)
+      // Fire button stays ON, just intensity fades in 3D
     } else if (fireActive) {
       sceneRef.current?.setWeather('fire'); // fire recovers when rain stops
     } else {
