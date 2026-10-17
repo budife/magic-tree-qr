@@ -275,6 +275,11 @@ export default function App() {
               An original, open-source take on the isometric QR-tree idea. Built with
               React and three.js.
             </p>
+            <p>
+              <a href="https://github.com/budife/magic-tree-qr" target="_blank" rel="noopener noreferrer">GitHub</a>
+              {' · '}
+              <a href="https://github.com/budife" target="_blank" rel="noopener noreferrer">@budife</a>
+            </p>
           </div>
         )}
       </div>
