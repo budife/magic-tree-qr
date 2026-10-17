@@ -272,13 +272,11 @@ export default function App() {
               zone, so the result actually scans.
             </p>
             <p>
-              An original, open-source take on the isometric QR-tree idea. Built with
-              React and three.js.
-            </p>
-            <p>
-              <a href="https://github.com/budife/magic-tree-qr" target="_blank" rel="noopener noreferrer">GitHub</a>
-              {' · '}
-              <a href="https://github.com/budife" target="_blank" rel="noopener noreferrer">@budife</a>
+              Forked from the original{' '}
+              <a href="https://github.com/anthropics/anthropic-quickstarts/tree/main/computer-use-demo/magic-tree" target="_blank" rel="noopener noreferrer">
+                Magic Tree by Anthropic
+              </a>
+              . An open-source take on the isometric QR-tree idea. Built with React and three.js.
             </p>
           </div>
         )}
