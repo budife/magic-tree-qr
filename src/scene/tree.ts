@@ -114,9 +114,9 @@ function growConifer(seed: number, opts: GrowOptions): TreeModel {
 
   const height = opts.height;
   const trunkR = opts.height * sp.trunkRadius;
-  // Palm oil: only 1 crown whorl at very top, pine has full 11 whorls
+  // Palm oil: tight 3-whorl crown at top (92-100%), pine has full 11 whorls spread
   const isPalm = sp.id === 'palm';
-  const whorls = isPalm ? 1 : 11;
+  const whorls = isPalm ? 3 : 11;
   const canopyBase = isPalm ? height * 0.92 : height * 0.16;
   const baseSpan = isPalm ? height * 0.42 : height * 0.34;
 
