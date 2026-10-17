@@ -26,6 +26,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   const ceiling = qr.plot * 0.85;
 
   let fireIntensity = 0.0; // 0-1, fades in on ignition, fades when rain falls on fire
+  let fireSpreadTimer = 0.0; // 0-30s, fire spreads across canvas over 30s
   let fireKillTimer = 0; // timer for fast extinguish when fire disabled
 
   // ---- Rain particles --------------------------------------------------------
@@ -138,6 +139,14 @@ export function buildWeather(qr: QrMatrix): Weather {
     const fadeSpeed = currentType === 'rain' ? 0.1 : 0.25; // rain kills 10s, ignition smooth 4s
     fireIntensity += (targetIntensity - fireIntensity) * fadeSpeed * dt * 5;
     
+    // Fire spread timer: 0-30s, controls how far fire spreads across canvas
+    if (currentType === 'fire' && fireSpreadTimer < 30) {
+      fireSpreadTimer += dt;
+    } else if (currentType !== 'fire') {
+      fireSpreadTimer = 0; // reset when fire off
+    }
+    const spreadRadius = Math.min(fireSpreadTimer / 30, 1); // 0-1 over 30s
+    
     // Fast kill timer (when fire disabled, 10s to extinguish)
     if (fireKillTimer > 0) {
       fireKillTimer -= dt;
@@ -176,14 +185,37 @@ export function buildWeather(qr: QrMatrix): Weather {
       // Core fire (hot inner flames)
       for (let i = 0; i < FIRE_COUNT; i++) {
         const o = i * 6;
-        fireState[o + 2] += fireState[o + 3] * dt; // rise
-        fireState[o + 5] += dt * 0.8; // life cycle
+        
+        // Particle distance from center (normalized 0-1)
+        const dx = fireState[o] / (spread * 0.8);
+        const dz = fireState[o + 1] / (spread * 0.8);
+        const distFromCenter = Math.sqrt(dx * dx + dz * dz);
+        
+        // Particle only active if within spread radius
+        const particleActive = distFromCenter <= spreadRadius;
+        
+        if (particleActive) {
+          fireState[o + 2] += fireState[o + 3] * dt; // rise
+          fireState[o + 5] += dt * 0.8; // life cycle
+        }
         
         if (fireState[o + 2] > ceiling * 0.5 || fireState[o + 5] > 1) {
+          // Reset particle: spawn within current spread radius
+          const angle = rng() * Math.PI * 2;
+          const radius = rng() * spreadRadius * spread * 0.8;
+          fireState[o] = Math.cos(angle) * radius;
+          fireState[o + 1] = Math.sin(angle) * radius;
           fireState[o + 2] = 0;
-          fireState[o] = (rng() - 0.5) * spread * 0.8;
-          fireState[o + 1] = (rng() - 0.5) * spread * 0.8;
           fireState[o + 5] = 0;
+        }
+        
+        if (!particleActive) {
+          // Hide particle outside spread radius
+          scl.setScalar(0);
+          fireMatrix.compose(pos.set(0, -100, 0), quat.identity(), scl);
+          fireCoreMesh.setMatrixAt(i, fireMatrix);
+          fireOuterMesh.setMatrixAt(i, fireMatrix);
+          continue;
         }
         
         const life = fireState[o + 5];
