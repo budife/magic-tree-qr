@@ -64,6 +64,7 @@ export function buildCanopy(qr: QrMatrix, palette: Palette, species: Species): C
     const fruitMat = new THREE.MeshLambertMaterial({ color: 0xffaa33 });
     fruits = new THREE.InstancedMesh(fruitGeo, fruitMat, fruitCount);
     fruits.castShadow = true;
+    fruits.renderOrder = 1; // render after branches/leaves
     
     const rngFruit = makeRng(seed ^ 0xffa500);
     const mat = new THREE.Matrix4();
@@ -78,11 +79,11 @@ export function buildCanopy(qr: QrMatrix, palette: Palette, species: Species): C
       for (let side = 0; side < 2; side++) {
         const idx = w * 2 + side;
         const angle = side * Math.PI + rngFruit() * 0.6;
-        const offset = 1.8 + rngFruit() * 0.8; // hang from trunk edge
-        const s = 0.7 + rngFruit() * 0.4;
+        const offset = 0.9 + rngFruit() * 0.3; // closer to trunk (was 1.8+0.8)
+        const s = 1.0 + rngFruit() * 0.5; // bigger (was 0.7+0.4)
         
-        pos.set(Math.cos(angle) * offset, y - 0.5, Math.sin(angle) * offset);
-        scale.set(s, s * 1.2, s); // slightly elongated
+        pos.set(Math.cos(angle) * offset, y - 0.3, Math.sin(angle) * offset);
+        scale.set(s, s * 1.4, s); // more elongated bunch
         mat.compose(pos, new THREE.Quaternion(), scale);
         fruits.setMatrixAt(idx, mat);
         
