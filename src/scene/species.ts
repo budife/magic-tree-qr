@@ -125,23 +125,23 @@ export const SPECIES: Record<SpeciesId, Species> = {
   palm: {
     id: 'palm',
     label: 'Palm',
-    heightFactor: 0.95,
-    trunkFraction: 0.18,
-    trunkRadius: 0.028,
-    maxDepth: 4,
-    forkChance: 0.85,
-    spread: [1.15, 1.52],
-    lengthDecay: [0.55, 0.68],
-    radiusDecay: 0.58,
-    upBiasLow: -0.18,
-    upBiasHigh: -0.45,
+    heightFactor: 0.90,
+    trunkFraction: 0.55,       // trunk panjang dominan
+    trunkRadius: 0.052,        // trunk tebal
+    maxDepth: 3,
+    forkChance: 0.01,          // hampir ga bercabang, pure leader
+    spread: [1.4, 1.7],        // daun lebar ke samping
+    lengthDecay: [0.60, 0.75],
+    radiusDecay: 0.52,
+    upBiasLow: 0.08,           // leader lurus
+    upBiasHigh: -0.32,         // fronds drooping di crown
     leader: true,
-    leafFromDepth: 2,
-    leafAlong: [0.05, 1],
-    cluster: [0.6, 1.35],
-    clusterYScale: 0.55,
-    leafSize: [0.48, 0.88],
-    taper: 0.42,
+    leafFromDepth: 8,          // daun HANYA di puncak (very deep requirement)
+    leafAlong: [0.02, 0.98],   // spread sepanjang frond
+    cluster: [0.68, 1.5],      // frond besar
+    clusterYScale: 0.68,       // drooping melengkung
+    leafSize: [0.56, 0.96],
+    taper: 0.78,               // coronet sharp
     bark: { bark: '#8a7a62', barkDark: '#5d5040' },
   },
 };
