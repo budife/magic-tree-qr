@@ -135,7 +135,7 @@ export function buildWeather(qr: QrMatrix): Weather {
     
     // Fire intensity fades when rain active, recovers when rain stops
     const targetIntensity = currentType === 'rain' ? 0 : 1;
-    const fadeSpeed = currentType === 'rain' ? 0.15 : 0.3; // rain kills fire slower than fire returns
+    const fadeSpeed = currentType === 'rain' ? 0.1 : 0.3; // rain kills fire 10s (0.1 * dt * 5 = 0.5/s = 2s to fade)
     fireIntensity += (targetIntensity - fireIntensity) * fadeSpeed * dt * 5;
     
     // Fast kill timer (when fire disabled, 10s to extinguish)
