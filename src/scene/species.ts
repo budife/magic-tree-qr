@@ -125,9 +125,9 @@ export const SPECIES: Record<SpeciesId, Species> = {
   palm: {
     id: 'palm',
     label: 'Palm',
-    heightFactor: 0.90,
+    heightFactor: 0.45,        // half height (was 0.90)
     trunkFraction: 0.55,       // trunk panjang dominan
-    trunkRadius: 0.052,        // trunk tebal
+    trunkRadius: 0.26,         // trunk 5x thicker (was 0.052)
     maxDepth: 3,
     forkChance: 0.01,          // hampir ga bercabang, pure leader
     spread: [1.4, 1.7],        // daun lebar ke samping

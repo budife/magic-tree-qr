@@ -243,17 +243,17 @@ function growPalm(seed: number, opts: GrowOptions): TreeModel {
       const t = 0.1 + (p / pinnaePerRachis) * 0.9;
       const pos = rachis.start.clone().lerp(rachis.end, t);
       
-      // Pinnae alternate sides + slight droop
+      // Pinnae alternate sides + slight droop (longer leaflets like coconut)
       const side = (p % 2) * 2 - 1; // -1 or 1
-      const pinnaeLen = lerp(0.6, 1.0, rng()); // pinnae length
-      const droop = 0.15 + t * 0.2; // droops more toward tip
+      const pinnaeLen = lerp(1.2, 2.0, rng()); // longer pinnae (was 0.6-1.0)
+      const droop = 0.25 + t * 0.35; // more droop toward tip
       
       leaves.push(new THREE.Vector3(
         pos.x + right.x * side * pinnaeLen,
         pos.y - droop,
         pos.z + right.z * side * pinnaeLen,
       ));
-      leafScales.push(lerp(0.35, 0.55, rng()));
+      leafScales.push(lerp(0.5, 0.75, rng())); // bigger leaflets (was 0.35-0.55)
     }
   }
   
