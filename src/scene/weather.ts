@@ -136,10 +136,10 @@ export function buildWeather(qr: QrMatrix): Weather {
   const update = (dt: number, time: number, visibility: number) => {
     const weatherVisible = visibility > 0.05 && currentType !== 'clear';
     
-    // Fire intensity fades when rain active, recovers when rain stops
-    const targetIntensity = currentType === 'rain' ? 0 : (currentType === 'fire' ? 1 : 0);
-    const fadeSpeed = currentType === 'rain' ? 0.1 : 0.25; // rain kills 10s, ignition smooth 4s
-    fireIntensity += (targetIntensity - fireIntensity) * fadeSpeed * dt * 5;
+    // Fire intensity: controlled by fire button, NOT by rain (rain uses per-particle wet damping)
+    const targetFireIntensity = currentType === 'fire' ? 1 : 0;
+    const fireF fadeSpeed = 0.25; // smooth ignition 4s
+    fireIntensity += (targetFireIntensity - fireIntensity) * fireFadeSpeed * dt * 5;
     
     // Rain intensity: smooth fade in/out (not instant on/off)
     const rainTargetIntensity = currentType === 'rain' ? 1 : 0;
