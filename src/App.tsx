@@ -48,6 +48,21 @@ const SPECIES_ICONS: Record<SpeciesId, () => React.ReactElement> = {
 /** Debounce regrowing the tree so it does not thrash on every keystroke. */
 const REBUILD_DELAY = 500;
 
+/** Get season based on current month (Northern hemisphere). */
+function getCurrentSeason(): SeasonId {
+  const month = new Date().getMonth(); // 0-11
+  if (month >= 2 && month <= 4) return 'spring'; // Mar-May
+  if (month >= 5 && month <= 7) return 'summer'; // Jun-Aug
+  if (month >= 8 && month <= 10) return 'autumn'; // Sep-Nov
+  return 'winter'; // Dec-Feb
+}
+
+/** Get random tree species. */
+function getRandomSpecies(): SpeciesId {
+  const species = SPECIES_ORDER;
+  return species[Math.floor(Math.random() * species.length)];
+}
+
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dockRef = useRef<HTMLDivElement>(null);
