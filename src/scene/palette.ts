@@ -41,7 +41,7 @@ export const SEASONS: Record<SeasonId, Palette> = {
     qrLeaf: ['#5e2340', '#4e1c35', '#6b2b4a'],
     bark: '#8a6a4e',
     barkDark: '#5f4733',
-    hedge: ['#f4b8cf', '#efa4c2', '#f8cfe0'],
+    hedge: ['#a8d88f', '#94c677', '#bce4a5'],
     moduleDark: '#d6d1c4',
     moduleLight: '#fdfbf6',
     slab: '#cfc9bb',
