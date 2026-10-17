@@ -119,3 +119,10 @@ export const BirchIcon = () => (
     <path d="m12 9.5 2.4-2.2M12 12.4 9.6 10.2" />
   </svg>
 );
+
+export const PalmIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" {...stroke}>
+    <path d="M12 21V8" />
+    <path d="M12 2.5c2.5 2.2 3 4.8 2.2 6.5M12 2.5c-2.5 2.2-3 4.8-2.2 6.5M12 3.2c.5 2.8.2 5-1.5 6.8M12 3.2c-.5 2.8-.2 5 1.5 6.8" />
+  </svg>
+);

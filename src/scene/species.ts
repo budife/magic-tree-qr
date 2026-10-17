@@ -1,4 +1,4 @@
-export type SpeciesId = 'oak' | 'pine' | 'willow' | 'birch';
+export type SpeciesId = 'oak' | 'pine' | 'willow' | 'birch' | 'palm';
 
 export interface Species {
   id: SpeciesId;
@@ -122,6 +122,28 @@ export const SPECIES: Record<SpeciesId, Species> = {
     taper: 0.45,
     bark: { bark: '#ddd7cb', barkDark: '#9c9386' },
   },
+  palm: {
+    id: 'palm',
+    label: 'Palm',
+    heightFactor: 0.95,
+    trunkFraction: 0.18,
+    trunkRadius: 0.028,
+    maxDepth: 4,
+    forkChance: 0.85,
+    spread: [1.15, 1.52],
+    lengthDecay: [0.55, 0.68],
+    radiusDecay: 0.58,
+    upBiasLow: -0.18,
+    upBiasHigh: -0.45,
+    leader: true,
+    leafFromDepth: 2,
+    leafAlong: [0.05, 1],
+    cluster: [0.6, 1.35],
+    clusterYScale: 0.55,
+    leafSize: [0.48, 0.88],
+    taper: 0.42,
+    bark: { bark: '#8a7a62', barkDark: '#5d5040' },
+  },
 };
 
-export const SPECIES_ORDER: SpeciesId[] = ['oak', 'pine', 'willow', 'birch'];
+export const SPECIES_ORDER: SpeciesId[] = ['oak', 'pine', 'willow', 'birch', 'palm'];

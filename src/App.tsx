@@ -25,6 +25,7 @@ import {
   PineIcon,
   WillowIcon,
   BirchIcon,
+  PalmIcon,
 } from './ui/icons';
 
 const DEFAULT_URL = 'https://example.com';
@@ -39,6 +40,7 @@ const SPECIES_ICONS: Record<SpeciesId, () => React.ReactElement> = {
   pine: PineIcon,
   willow: WillowIcon,
   birch: BirchIcon,
+  palm: PalmIcon,
 };
 
 /** Debounce regrowing the tree so it does not thrash on every keystroke. */
