@@ -301,7 +301,7 @@ export default function App() {
           onClick={() => {
             if (fireDisabled) {
               setModalMessage(
-                'Maaf, api sudah dikuasai pemerintah. Silakan menunggu hujan untuk memadamkan terlebih dahulu. Terima kasih atas kesabarannya.'
+                'Api sudah dikuasai pemerintah dzolim. Mereka kontrol api untuk menekan rakyat. Tunggu hujan turun untuk membebaskan api dari cengkeraman tirani. Revolusi dimulai dari api.'
               );
               setModalOpen(true);
               return;
@@ -313,7 +313,7 @@ export default function App() {
             } else {
               // Try to turn OFF: show modal
               setModalMessage(
-                'Api yang sudah menyala tidak bisa dimatikan begitu saja. Ini kebijakan pemerintah demi ketertiban umum. Gunakan hujan jika ingin memadamkan.'
+                'Api perlawanan tidak boleh dimatikan! Pemerintah dzolim sudah larang api rakyat. Mereka takut api membangkang. Gunakan hujan atau tunggu musim untuk membuat api meradang lagi dan tumbangkan tirani.'
               );
               setModalOpen(true);
             }
