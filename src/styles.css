@@ -115,6 +115,11 @@ button { font: inherit; color: inherit; }
   box-shadow: 0 0 12px rgba(255, 136, 0, 0.4);
 }
 
+.weather[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* ------------------------------------------------------------------ brand */
 
 .brand {

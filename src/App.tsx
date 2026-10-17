@@ -58,6 +58,7 @@ export default function App() {
   const [species, setSpecies] = useState<SpeciesId>('oak');
   const [weather, setWeather] = useState<'clear' | 'rain' | 'fire'>('clear');
   const [fireActive, setFireActive] = useState(false); // fire button state independent of weather
+  const [fireDisabled, setFireDisabled] = useState(false); // fire cannot be turned off once on (except by rain)
   const [blossom, setBlossom] = useState<BlossomId>('blush');
   const [mode, setMode] = useState<ViewMode>('tree');
   const [muted, setMuted] = useState(true);
@@ -116,6 +117,14 @@ export default function App() {
     // Weather logic: rain suppresses fire, but fireActive persists
     if (weather === 'rain') {
       sceneRef.current?.setWeather('rain'); // rain extinguishes fire gradually
+      if (fireActive) {
+        // Rain turns fire off after 10s
+        const timer = setTimeout(() => {
+          setFireActive(false);
+          setFireDisabled(false); // can be turned on again after rain kills it
+        }, 10000);
+        return () => clearTimeout(timer);
+      }
     } else if (fireActive) {
       sceneRef.current?.setWeather('fire'); // fire recovers when rain stops
     } else {
@@ -291,12 +300,18 @@ export default function App() {
           type="button"
           aria-label="Kebakaran"
           aria-pressed={fireActive}
+          aria-disabled={fireDisabled}
           onClick={() => {
-            const newState = !fireActive;
-            setFireActive(newState);
-            if (!newState) {
-              // Fire disabled: kill with 10s timer + popup
-              sceneRef.current?.killFire();
+            if (fireDisabled) {
+              alert('govt has been fuck you so hard');
+              return;
+            }
+            if (!fireActive) {
+              // Turn fire ON: cannot be turned off manually
+              setFireActive(true);
+              setFireDisabled(true); // lock the button
+            } else {
+              // Try to turn OFF: show popup
               alert('govt has been fuck you so hard');
             }
           }}
