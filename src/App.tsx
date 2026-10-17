@@ -64,6 +64,8 @@ export default function App() {
   const [muted, setMuted] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   const palette = useMemo<Palette>(() => {
     const base = SEASONS[season];
@@ -303,7 +305,10 @@ export default function App() {
           aria-disabled={fireDisabled}
           onClick={() => {
             if (fireDisabled) {
-              alert('govt has been fuck you so hard');
+              setModalMessage(
+                'Maaf, api sudah dikuasai pemerintah. Silakan menunggu hujan untuk memadamkan terlebih dahulu. Terima kasih atas kesabarannya.'
+              );
+              setModalOpen(true);
               return;
             }
             if (!fireActive) {
@@ -311,8 +316,11 @@ export default function App() {
               setFireActive(true);
               setFireDisabled(true); // lock the button
             } else {
-              // Try to turn OFF: show popup
-              alert('govt has been fuck you so hard');
+              // Try to turn OFF: show modal
+              setModalMessage(
+                'Api yang sudah menyala tidak bisa dimatikan begitu saja. Ini kebijakan pemerintah demi ketertiban umum. Gunakan hujan jika ingin memadamkan.'
+              );
+              setModalOpen(true);
             }
           }}
         >

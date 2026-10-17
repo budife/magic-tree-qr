@@ -85,20 +85,25 @@ button { font: inherit; color: inherit; }
 
 .weather {
   border: none;
-  background: transparent;
-  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  padding: 10px 14px;
   border-radius: var(--radius-pill);
   cursor: pointer;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid transparent;
+  position: relative;
 }
 
 .weather:hover {
-  background: rgba(158, 142, 121, 0.12);
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  border-color: rgba(255, 136, 0, 0.3);
 }
 
 .weather:focus-visible {
@@ -107,17 +112,32 @@ button { font: inherit; color: inherit; }
 }
 
 .weather:active {
-  transform: scale(0.95);
+  transform: scale(0.96) translateY(0);
 }
 
 .weather[aria-pressed="true"] {
-  background: var(--accent);
-  box-shadow: 0 0 12px rgba(255, 136, 0, 0.4);
+  background: linear-gradient(135deg, rgba(255, 136, 0, 0.9), rgba(255, 102, 34, 0.85));
+  box-shadow: 0 0 20px rgba(255, 136, 0, 0.6), 
+              0 4px 12px rgba(255, 102, 34, 0.4),
+              inset 0 -2px 8px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 200, 100, 0.5);
+  transform: translateY(0);
+}
+
+.weather[aria-pressed="true"]::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, rgba(255, 200, 100, 0.4), transparent);
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .weather[aria-disabled="true"] {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.5;
+  filter: grayscale(0.3);
 }
 
 /* ------------------------------------------------------------------ brand */
