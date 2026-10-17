@@ -34,6 +34,7 @@ export interface GrowOptions {
  * Everything is driven by `rng`, so the same URL always yields the same tree.
  */
 export function growTree(seed: number, opts: GrowOptions): TreeModel {
+  if (opts.species.id === 'palm') return growPalm(seed, opts);
   if (opts.species.leader) return growConifer(seed, opts);
   const sp = opts.species;
   const rng = makeRng(seed);
@@ -167,6 +168,112 @@ function growConifer(seed: number, opts: GrowOptions): TreeModel {
 
   const treeHeight = branches.reduce((m, b) => Math.max(m, b.end.y), 0);
   const { leaves, leafScales } = scatterLeaves(branches, opts.leafCount, treeHeight, sp, rng);
+  return {
+    branches,
+    leaves,
+    leafScales,
+    height: treeHeight,
+    ...canopyBounds(leaves, leafScales, treeHeight),
+  };
+}
+
+/**
+ * Oil palm (Elaeis guineensis): single trunk + crown of arching fronds.
+ * Each frond = rachis (midrib) + 100-350 pinnae leaflets along it.
+ */
+function growPalm(seed: number, opts: GrowOptions): TreeModel {
+  const sp = opts.species;
+  const rng = makeRng(seed);
+  const branches: Branch[] = [];
+  
+  const height = opts.height;
+  const trunkR = opts.height * sp.trunkRadius;
+  const frondCount = 25 + Math.floor(rng() * 15); // 25-40 fronds (real range 20-40)
+  const crownBase = height * 0.88; // crown starts at 88% height
+  
+  // Trunk segments
+  const trunkSegs = 12;
+  for (let i = 0; i < trunkSegs; i++) {
+    const y0 = (height * i) / trunkSegs;
+    const y1 = (height * (i + 1)) / trunkSegs;
+    const lean = 0.02 * height;
+    branches.push({
+      start: new THREE.Vector3(Math.sin(i * 0.5) * lean * 0.04, y0, 0),
+      end: new THREE.Vector3(Math.sin((i + 1) * 0.5) * lean * 0.04, y1, 0),
+      radius: trunkR * (1 - (i / trunkSegs) * 0.2), // slight taper
+      depth: i === 0 ? 0 : 1,
+    });
+  }
+  
+  // Fronds: arching rachis from crown base
+  const goldenAngle = 137.5 * (Math.PI / 180); // Fibonacci spiral
+  for (let f = 0; f < frondCount; f++) {
+    const age = f / frondCount; // 0 = youngest (center), 1 = oldest
+    const y = crownBase + (height - crownBase) * (1 - age * 0.6); // younger = higher
+    const azimuth = f * goldenAngle; // spiral phyllotaxis
+    
+    // Rachis: starts erect (young) or arching outward (mature)
+    const archAngle = age < 0.3 ? lerp(0.1, 0.3, age / 0.3) : lerp(0.3, 1.1, (age - 0.3) / 0.7);
+    const rachisLen = lerp(6.5, 8.5, rng()); // 6.5-8.5m rachis
+    
+    const endX = Math.cos(azimuth) * Math.sin(archAngle) * rachisLen;
+    const endY = y + Math.cos(archAngle) * rachisLen;
+    const endZ = Math.sin(azimuth) * Math.sin(archAngle) * rachisLen;
+    
+    branches.push({
+      start: new THREE.Vector3(0, y, 0),
+      end: new THREE.Vector3(endX, endY, endZ),
+      radius: trunkR * 0.15, // rachis thinner than trunk
+      depth: 2, // frond rachis
+    });
+  }
+  
+  // Pinnae leaflets scattered along rachis branches
+  const leaves: THREE.Vector3[] = [];
+  const leafScales: number[] = [];
+  const rachises = branches.filter(b => b.depth === 2);
+  const pinnaePerRachis = Math.floor(opts.leafCount / rachises.length);
+  
+  for (const rachis of rachises) {
+    const dir = rachis.end.clone().sub(rachis.start).normalize();
+    const right = new THREE.Vector3(-dir.z, 0, dir.x).normalize(); // perpendicular in XZ
+    
+    for (let p = 0; p < pinnaePerRachis; p++) {
+      // Pinnae along rachis (skip base 10%)
+      const t = 0.1 + (p / pinnaePerRachis) * 0.9;
+      const pos = rachis.start.clone().lerp(rachis.end, t);
+      
+      // Pinnae alternate sides + slight droop
+      const side = (p % 2) * 2 - 1; // -1 or 1
+      const pinnaeLen = lerp(0.6, 1.0, rng()); // pinnae length
+      const droop = 0.15 + t * 0.2; // droops more toward tip
+      
+      leaves.push(new THREE.Vector3(
+        pos.x + right.x * side * pinnaeLen,
+        pos.y - droop,
+        pos.z + right.z * side * pinnaeLen,
+      ));
+      leafScales.push(lerp(0.35, 0.55, rng()));
+    }
+  }
+  
+  // Pad to exact leafCount (rounding loss from floor)
+  while (leaves.length < opts.leafCount && rachises.length > 0) {
+    const rachis = rachises[Math.floor(rng() * rachises.length)];
+    const t = 0.5 + rng() * 0.4;
+    const pos = rachis.start.clone().lerp(rachis.end, t);
+    const dir = rachis.end.clone().sub(rachis.start).normalize();
+    const right = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
+    const side = (leaves.length % 2) * 2 - 1;
+    leaves.push(new THREE.Vector3(
+      pos.x + right.x * side * 0.8,
+      pos.y - 0.2,
+      pos.z + right.z * side * 0.8,
+    ));
+    leafScales.push(0.45);
+  }
+  
+  const treeHeight = branches.reduce((m, b) => Math.max(m, b.end.y), 0);
   return {
     branches,
     leaves,
