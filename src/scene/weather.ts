@@ -25,7 +25,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   const spread = qr.plot * 0.6;
   const ceiling = qr.plot * 0.85;
 
-  let fireIntensity = 1.0; // 0-1, fades when rain falls on fire
+  let fireIntensity = 0.0; // 0-1, fades in on ignition, fades when rain falls on fire
   let fireKillTimer = 0; // timer for fast extinguish when fire disabled
 
   // ---- Rain particles --------------------------------------------------------
@@ -134,8 +134,8 @@ export function buildWeather(qr: QrMatrix): Weather {
     const weatherVisible = visibility > 0.05 && currentType !== 'clear';
     
     // Fire intensity fades when rain active, recovers when rain stops
-    const targetIntensity = currentType === 'rain' ? 0 : 1;
-    const fadeSpeed = currentType === 'rain' ? 0.1 : 0.3; // rain kills fire 10s (0.1 * dt * 5 = 0.5/s = 2s to fade)
+    const targetIntensity = currentType === 'rain' ? 0 : (currentType === 'fire' ? 1 : 0);
+    const fadeSpeed = currentType === 'rain' ? 0.1 : 0.25; // rain kills 10s, ignition smooth 4s
     fireIntensity += (targetIntensity - fireIntensity) * fadeSpeed * dt * 5;
     
     // Fast kill timer (when fire disabled, 10s to extinguish)
