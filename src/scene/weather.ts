@@ -27,6 +27,7 @@ export function buildWeather(qr: QrMatrix): Weather {
 
   let fireIntensity = 0.0; // 0-1, fades in on ignition, fades when rain falls on fire
   let rainIntensity = 0.0; // 0-1, fades in when rain active, fades out when rain off
+  let rainWetRadius = 0.0; // 0-1, rain extinguishes fire in expanding patches over 20s
   let fireSpreadTimer = 0.0; // 0-30s, fire spreads across canvas over 30s
   let fireKillTimer = 0; // timer for fast extinguish when fire disabled
 
@@ -144,6 +145,13 @@ export function buildWeather(qr: QrMatrix): Weather {
     const rainTargetIntensity = currentType === 'rain' ? 1 : 0;
     rainIntensity += (rainTargetIntensity - rainIntensity) * 0.2 * dt * 5; // 0.2 speed = ~5s fade
     
+    // Rain wet radius: extinguishes fire in expanding patches over 20s
+    if (currentType === 'rain' && rainWetRadius < 1) {
+      rainWetRadius = Math.min(rainWetRadius + dt / 20, 1); // 0-1 over 20s
+    } else if (currentType !== 'rain') {
+      rainWetRadius = 0; // reset when rain off
+    }
+    
     // Fire spread timer: 0-30s, controls how far fire spreads across canvas
     if (currentType === 'fire' && fireSpreadTimer < 30) {
       fireSpreadTimer += dt;
@@ -199,6 +207,10 @@ export function buildWeather(qr: QrMatrix): Weather {
         // Particle only active if within spread radius
         const particleActive = distFromCenter <= spreadRadius;
         
+        // Rain wet zones: particles within rainWetRadius are extinguished
+        const isWet = currentType === 'rain' && distFromCenter <= rainWetRadius;
+        const wetDamping = isWet ? Math.max(0, 1 - (rainWetRadius - distFromCenter) * 3) : 1; // smooth edge
+        
         if (particleActive) {
           fireState[o + 2] += fireState[o + 3] * dt; // rise
           fireState[o + 5] += dt * 0.8; // life cycle
@@ -224,7 +236,7 @@ export function buildWeather(qr: QrMatrix): Weather {
         }
         
         const life = fireState[o + 5];
-        const flicker = (Math.sin(time * 12 + fireState[o + 4]) * 0.3 + 0.9) * fireIntensity;
+        const flicker = (Math.sin(time * 12 + fireState[o + 4]) * 0.3 + 0.9) * fireIntensity * wetDamping;
         const sway = Math.sin(time * 4 + fireState[o + 4]) * 0.5 * fireIntensity;
         
         pos.set(fireState[o] + sway, fireState[o + 2], fireState[o + 1] + sway * 0.4);
@@ -232,14 +244,14 @@ export function buildWeather(qr: QrMatrix): Weather {
         
         // Core: yellow-white hot
         const heat = Math.min(fireState[o + 2] / 5, 1);
-        fireColor.setHSL(0.12 - heat * 0.08, 0.98 * fireIntensity, (0.7 + heat * 0.25) * fireIntensity);
+        fireColor.setHSL(0.12 - heat * 0.08, 0.98 * fireIntensity * wetDamping, (0.7 + heat * 0.25) * fireIntensity * wetDamping);
         fireCoreMesh.setColorAt(i, fireColor);
         fireMatrix.compose(pos, quat.identity(), scl);
         fireCoreMesh.setMatrixAt(i, fireMatrix);
         
         // Outer: orange-red cooler
         scl.setScalar(flicker * 1.8 * (1 - life * 0.2));
-        fireColor.setHSL(0.08 - heat * 0.04, 0.92 * fireIntensity, (0.55 + heat * 0.2) * fireIntensity);
+        fireColor.setHSL(0.08 - heat * 0.04, 0.92 * fireIntensity * wetDamping, (0.55 + heat * 0.2) * fireIntensity * wetDamping);
         fireOuterMesh.setColorAt(i, fireColor);
         fireMatrix.compose(pos, quat.identity(), scl);
         fireOuterMesh.setMatrixAt(i, fireMatrix);
