@@ -1,4 +1,4 @@
-export type SeasonId = 'spring' | 'summer' | 'autumn';
+export type SeasonId = 'spring' | 'summer' | 'autumn' | 'winter';
 
 export interface Palette {
   id: SeasonId;
@@ -42,9 +42,9 @@ export const SEASONS: Record<SeasonId, Palette> = {
     bark: '#8a6a4e',
     barkDark: '#5f4733',
     hedge: ['#a8d88f', '#94c677', '#bce4a5'],
-    moduleDark: '#d6d1c4',
-    moduleLight: '#fdfbf6',
-    slab: '#cfc9bb',
+    moduleDark: '#e8a4c2',
+    moduleLight: '#fef5f9',
+    slab: '#f5dae6',
     ground: '#fce8f2',
   },
   summer: {
@@ -55,9 +55,9 @@ export const SEASONS: Record<SeasonId, Palette> = {
     bark: '#8a6a4e',
     barkDark: '#5f4733',
     hedge: ['#7ec25a', '#6bb047', '#93d06f'],
-    moduleDark: '#d6d1c4',
-    moduleLight: '#fdfbf6',
-    slab: '#cfc9bb',
+    moduleDark: '#a4d68a',
+    moduleLight: '#f8fef5',
+    slab: '#d6eac8',
     ground: '#e8f5e0',
   },
   autumn: {
@@ -68,11 +68,24 @@ export const SEASONS: Record<SeasonId, Palette> = {
     bark: '#6f5540',
     barkDark: '#4a382a',
     hedge: ['#dcb84a', '#c9a437', '#e8cc6a'],
-    moduleDark: '#d6d1c4',
-    moduleLight: '#fdfbf6',
-    slab: '#cfc9bb',
+    moduleDark: '#f2c97a',
+    moduleLight: '#fefaf5',
+    slab: '#f5e8cc',
     ground: '#fef4e6',
+  },
+  winter: {
+    id: 'winter',
+    label: 'Winter',
+    leaf: ['#7cb6ea', '#63a4e0', '#9dcbf2', '#4a92d6'],
+    qrLeaf: ['#16324d', '#122942', '#1b3b5a'],
+    bark: '#6d7a8a',
+    barkDark: '#49525d',
+    hedge: ['#b8d9f5', '#a0c9ed', '#d0e8f7'],
+    moduleDark: '#a8c9ed',
+    moduleLight: '#f5fafe',
+    slab: '#d9e8f5',
+    ground: '#e8f2fa',
   },
 };
 
-export const SEASON_ORDER: SeasonId[] = ['spring', 'summer', 'autumn'];
+export const SEASON_ORDER: SeasonId[] = ['spring', 'summer', 'autumn', 'winter'];

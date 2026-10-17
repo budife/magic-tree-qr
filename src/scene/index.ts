@@ -217,6 +217,9 @@ export class MagicTreeScene {
     this.plot.applyPalette(palette);
     this.canopy.applyPalette(palette);
     this.motes.applyPalette(palette);
+    // The loop stops repainting leaves once the code has settled, so a palette
+    // change in code view must push the new colours through explicitly.
+    this.canopy.setMorph(this.morph, this.elapsed);
   }
 
   setMode(mode: ViewMode) {

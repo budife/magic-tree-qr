@@ -10,10 +10,12 @@ import {
 } from './scene/palette';
 import { SPECIES, SPECIES_ORDER, type SpeciesId } from './scene/species';
 import { Ambience } from './audio/ambience';
+import { buildShareImage } from './share/qrImage';
 import {
   SpringIcon,
   SummerIcon,
   AutumnIcon,
+  WinterIcon,
   ShareIcon,
   InfoIcon,
   SoundOnIcon,
@@ -30,6 +32,7 @@ const SEASON_ICONS: Record<SeasonId, () => React.ReactElement> = {
   spring: SpringIcon,
   summer: SummerIcon,
   autumn: AutumnIcon,
+  winter: WinterIcon,
 };
 const SPECIES_ICONS: Record<SpeciesId, () => React.ReactElement> = {
   oak: OakIcon,
@@ -163,21 +166,18 @@ export default function App() {
     const url = committed;
     
     try {
-      // Try to capture QR image if in code view
-      if (mode === 'code' && sceneRef.current) {
-        const dataUrl = sceneRef.current.snapshot();
-        const blob = await (await fetch(dataUrl)).blob();
-        const file = new File([blob], 'magic-tree-qr.png', { type: 'image/png' });
-        
-        // Try Web Share API with image
-        if (navigator.canShare?.({ files: [file] })) {
-          await navigator.share({
-            title: 'Magic Tree QR Code',
-            text: `Scan this tree: ${url}`,
-            files: [file],
-          });
-          return;
-        }
+      // Capture QR as proper scannable PNG with link text
+      const blob = await buildShareImage(url, palette);
+      const file = new File([blob], 'magic-tree-qr.png', { type: 'image/png' });
+      
+      // Try Web Share API with image
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: 'Magic Tree QR Code',
+          text: `Scan this tree: ${url}`,
+          files: [file],
+        });
+        return;
       }
       
       // Fallback: share URL only
@@ -196,7 +196,7 @@ export default function App() {
     } catch (err) {
       if ((err as Error)?.name !== 'AbortError') setToast('Could not share');
     }
-  }, [committed, mode]);
+  }, [committed, palette]);
 
   const onCanvasKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {

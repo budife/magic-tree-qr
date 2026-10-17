@@ -28,6 +28,13 @@ export const AutumnIcon = () => (
   </svg>
 );
 
+export const WinterIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" {...stroke}>
+    <path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9" />
+    <path d="M9.5 4.6 12 7l2.5-2.4M9.5 19.4 12 17l2.5 2.4" />
+  </svg>
+);
+
 export const ShareIcon = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" {...stroke} strokeWidth={1.8}>
     <path d="M12 15V3.5M12 3.5 8.2 7.3M12 3.5l3.8 3.8" />
