@@ -214,7 +214,7 @@ function growPalm(seed: number, opts: GrowOptions): TreeModel {
     
     // Rachis: starts erect (young) or arching outward (mature)
     const archAngle = age < 0.3 ? lerp(0.1, 0.3, age / 0.3) : lerp(0.3, 1.1, (age - 0.3) / 0.7);
-    const rachisLen = lerp(6.5, 8.5, rng()); // 6.5-8.5m rachis
+    const rachisLen = lerp(10, 14, rng()); // longer fronds 10-14m (was 6.5-8.5)
     
     const endX = Math.cos(azimuth) * Math.sin(archAngle) * rachisLen;
     const endY = y + Math.cos(archAngle) * rachisLen;
