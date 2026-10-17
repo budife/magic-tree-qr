@@ -48,7 +48,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   }
 
   // ---- Fire particles (multi-layer: core + outer flames) ---------------------
-  const fireCoreGeo = new THREE.SphereGeometry(0.8, 8, 8); // inner hot core
+  const fireCoreGeo = new THREE.SphereGeometry(0.4, 8, 8); // inner hot core (was 0.8)
   const fireCoreMat = new THREE.MeshBasicMaterial({ 
     color: 0xffaa00, 
     transparent: true,
@@ -57,7 +57,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   fireCoreMesh.visible = false;
   group.add(fireCoreMesh);
 
-  const fireOuterGeo = new THREE.SphereGeometry(1.8, 10, 10); // outer cooler flames
+  const fireOuterGeo = new THREE.SphereGeometry(0.9, 10, 10); // outer cooler flames (was 1.8)
   const fireOuterMat = new THREE.MeshBasicMaterial({ 
     color: 0xff6622, 
     transparent: true,
@@ -67,7 +67,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   group.add(fireOuterMesh);
 
   // ---- Smoke particles -------------------------------------------------------
-  const smokeGeo = new THREE.SphereGeometry(2.5, 8, 8); // large, soft
+  const smokeGeo = new THREE.SphereGeometry(1.25, 8, 8); // large, soft (was 2.5)
   const smokeMat = new THREE.MeshBasicMaterial({
     color: 0x222222,
     transparent: true,
@@ -77,7 +77,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   group.add(smokeMesh);
 
   // ---- Embers (flying sparks) ------------------------------------------------
-  const emberGeo = new THREE.SphereGeometry(0.15, 6, 6);
+  const emberGeo = new THREE.SphereGeometry(0.08, 6, 6); // (was 0.15)
   const emberMat = new THREE.MeshBasicMaterial({
     color: 0xff4400,
     transparent: true,
