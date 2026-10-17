@@ -250,14 +250,32 @@ export function buildWeather(qr: QrMatrix): Weather {
       // Smoke (rises from fire, darker)
       for (let i = 0; i < SMOKE_COUNT; i++) {
         const o = i * 6;
-        smokeState[o + 2] += smokeState[o + 3] * dt;
-        smokeState[o + 5] += dt * 0.4;
+        
+        // Smoke follows fire spread (wider radius)
+        const dx = smokeState[o] / (spread * 1.2);
+        const dz = smokeState[o + 1] / (spread * 1.2);
+        const distFromCenter = Math.sqrt(dx * dx + dz * dz);
+        const smokeActive = distFromCenter <= spreadRadius * 1.1; // 10% wider than fire
+        
+        if (smokeActive) {
+          smokeState[o + 2] += smokeState[o + 3] * dt;
+          smokeState[o + 5] += dt * 0.4;
+        }
         
         if (smokeState[o + 2] > ceiling || smokeState[o + 5] > 1) {
+          const angle = rng() * Math.PI * 2;
+          const radius = rng() * spreadRadius * 1.1 * spread * 1.2;
+          smokeState[o] = Math.cos(angle) * radius;
+          smokeState[o + 1] = Math.sin(angle) * radius;
           smokeState[o + 2] = 3 + rng() * 5;
-          smokeState[o] = (rng() - 0.5) * spread * 1.2;
-          smokeState[o + 1] = (rng() - 0.5) * spread * 1.2;
           smokeState[o + 5] = 0;
+        }
+        
+        if (!smokeActive) {
+          scl.setScalar(0);
+          smokeMatrix.compose(pos.set(0, -100, 0), quat.identity(), scl);
+          smokeMesh.setMatrixAt(i, smokeMatrix);
+          continue;
         }
         
         const life = smokeState[o + 5];
@@ -276,14 +294,32 @@ export function buildWeather(qr: QrMatrix): Weather {
       // Embers (flying sparks)
       for (let i = 0; i < EMBER_COUNT; i++) {
         const o = i * 6;
-        emberState[o + 2] += emberState[o + 3] * dt;
-        emberState[o + 5] += dt * 1.2;
+        
+        // Embers follow fire core spread
+        const dx = emberState[o] / (spread * 0.6);
+        const dz = emberState[o + 1] / (spread * 0.6);
+        const distFromCenter = Math.sqrt(dx * dx + dz * dz);
+        const emberActive = distFromCenter <= spreadRadius;
+        
+        if (emberActive) {
+          emberState[o + 2] += emberState[o + 3] * dt;
+          emberState[o + 5] += dt * 1.2;
+        }
         
         if (emberState[o + 2] > ceiling * 0.6 || emberState[o + 5] > 1) {
+          const angle = rng() * Math.PI * 2;
+          const radius = rng() * spreadRadius * spread * 0.6;
+          emberState[o] = Math.cos(angle) * radius;
+          emberState[o + 1] = Math.sin(angle) * radius;
           emberState[o + 2] = 0;
-          emberState[o] = (rng() - 0.5) * spread * 0.6;
-          emberState[o + 1] = (rng() - 0.5) * spread * 0.6;
           emberState[o + 5] = 0;
+        }
+        
+        if (!emberActive) {
+          scl.setScalar(0);
+          emberMatrix.compose(pos.set(0, -100, 0), quat.identity(), scl);
+          emberMesh.setMatrixAt(i, emberMatrix);
+          continue;
         }
         
         const life = emberState[o + 5];
