@@ -71,8 +71,8 @@ export default function App() {
 
   const [draft, setDraft] = useState('');
   const [committed, setCommitted] = useState('');
-  const [season, setSeason] = useState<SeasonId>('summer');
-  const [species, setSpecies] = useState<SpeciesId>('oak');
+  const [season, setSeason] = useState<SeasonId>(getCurrentSeason());
+  const [species, setSpecies] = useState<SpeciesId>(getRandomSpecies());
   const [weather, setWeather] = useState<'clear' | 'rain' | 'fire'>('clear');
   const [fireActive, setFireActive] = useState(false); // fire button state independent of weather
   const [fireDisabled, setFireDisabled] = useState(false); // fire cannot be turned off once on (except by rain)
