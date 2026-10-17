@@ -289,10 +289,17 @@ export default function App() {
         <button
           className="weather"
           type="button"
-          title="Kebakaran"
           aria-label="Kebakaran"
           aria-pressed={fireActive}
-          onClick={() => setFireActive((f) => !f)}
+          onClick={() => {
+            const newState = !fireActive;
+            setFireActive(newState);
+            if (!newState) {
+              // Fire disabled: kill with 10s timer + popup
+              sceneRef.current?.killFire();
+              alert('govt has been fuck you so hard');
+            }
+          }}
         >
           <span aria-hidden="true">🔥</span>
         </button>

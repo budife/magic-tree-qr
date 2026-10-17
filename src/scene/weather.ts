@@ -5,12 +5,14 @@ import type { QrMatrix } from './qr';
 export type WeatherType = 'clear' | 'rain' | 'fire';
 
 const RAIN_COUNT = 200;
-const FIRE_COUNT = 250; // more fire particles (was 120)
+const FIRE_COUNT = 250;
+const FIRE_KILL_TIME = 10; // seconds to extinguish fire when disabled
 
 export interface Weather {
   group: THREE.Group;
   update: (dt: number, time: number, visibility: number) => void;
   setType: (type: WeatherType) => void;
+  setKillTimer: () => void;
   dispose: () => void;
 }
 
@@ -22,6 +24,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   const ceiling = qr.plot * 0.85;
 
   let fireIntensity = 1.0; // 0-1, fades when rain falls on fire
+  let fireKillTimer = 0; // timer for fast extinguish when fire disabled
 
   // ---- Rain particles --------------------------------------------------------
   const rainGeo = new THREE.BoxGeometry(0.08, 0.6, 0.08);
@@ -43,7 +46,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   }
 
   // ---- Fire particles --------------------------------------------------------
-  const fireGeo = new THREE.SphereGeometry(0.6, 8, 8); // bigger sphere (was 0.3)
+  const fireGeo = new THREE.SphereGeometry(1.2, 8, 8); // 2x bigger (was 0.6)
   const fireMat = new THREE.MeshBasicMaterial({ 
     color: 0xff6622, 
     transparent: true,
@@ -77,6 +80,12 @@ export function buildWeather(qr: QrMatrix): Weather {
     const targetIntensity = currentType === 'rain' ? 0 : 1;
     const fadeSpeed = currentType === 'rain' ? 0.15 : 0.3; // rain kills fire slower than fire returns
     fireIntensity += (targetIntensity - fireIntensity) * fadeSpeed * dt * 5;
+    
+    // Fast kill timer (when fire disabled, 10s to extinguish)
+    if (fireKillTimer > 0) {
+      fireKillTimer -= dt;
+      fireIntensity = Math.max(0, fireKillTimer / FIRE_KILL_TIME); // linear fade from 1 to 0
+    }
     
     rainMesh.visible = weatherVisible && currentType === 'rain';
     fireMesh.visible = weatherVisible && fireIntensity > 0.02; // fade out completely
@@ -142,6 +151,10 @@ export function buildWeather(qr: QrMatrix): Weather {
     currentType = type;
   };
 
+  const setKillTimer = () => {
+    fireKillTimer = FIRE_KILL_TIME;
+  };
+
   const dispose = () => {
     rainGeo.dispose();
     rainMat.dispose();
@@ -149,5 +162,5 @@ export function buildWeather(qr: QrMatrix): Weather {
     fireMat.dispose();
   };
 
-  return { group, update, setType, dispose };
+  return { group, update, setType, setKillTimer, dispose };
 }

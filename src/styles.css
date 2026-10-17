@@ -91,11 +91,19 @@ button { font: inherit; color: inherit; }
   cursor: pointer;
   font-size: 20px;
   line-height: 1;
-  transition: background 0.2s, transform 0.15s;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .weather:hover {
   background: rgba(158, 142, 121, 0.12);
+}
+
+.weather:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .weather:active {
@@ -104,6 +112,7 @@ button { font: inherit; color: inherit; }
 
 .weather[aria-pressed="true"] {
   background: var(--accent);
+  box-shadow: 0 0 12px rgba(255, 136, 0, 0.4);
 }
 
 /* ------------------------------------------------------------------ brand */

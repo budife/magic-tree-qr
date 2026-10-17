@@ -238,6 +238,10 @@ export class MagicTreeScene {
     this.weather.setType(type);
   }
 
+  killFire() {
+    this.weather.setKillTimer();
+  }
+
   toggleMode() {
     this.morphTarget = this.morphTarget > 0.5 ? 0 : 1;
     return this.morphTarget > 0.5 ? 'code' : 'tree';
