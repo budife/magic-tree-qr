@@ -57,6 +57,7 @@ export default function App() {
   const [season, setSeason] = useState<SeasonId>('summer');
   const [species, setSpecies] = useState<SpeciesId>('oak');
   const [weather, setWeather] = useState<'clear' | 'rain' | 'fire'>('clear');
+  const [fireActive, setFireActive] = useState(false); // fire button state independent of weather
   const [blossom, setBlossom] = useState<BlossomId>('blush');
   const [mode, setMode] = useState<ViewMode>('tree');
   const [muted, setMuted] = useState(true);
@@ -112,8 +113,15 @@ export default function App() {
   }, [species]);
 
   useEffect(() => {
-    sceneRef.current?.setWeather(weather);
-  }, [weather]);
+    // Weather logic: rain suppresses fire, but fireActive persists
+    if (weather === 'rain') {
+      sceneRef.current?.setWeather('rain'); // rain extinguishes fire gradually
+    } else if (fireActive) {
+      sceneRef.current?.setWeather('fire'); // fire recovers when rain stops
+    } else {
+      sceneRef.current?.setWeather('clear');
+    }
+  }, [weather, fireActive]);
 
   // Report the dock's real height so the code is never framed underneath it.
   useEffect(() => {
@@ -283,8 +291,8 @@ export default function App() {
           type="button"
           title="Kebakaran"
           aria-label="Kebakaran"
-          aria-pressed={weather === 'fire'}
-          onClick={() => setWeather((w) => (w === 'fire' ? 'clear' : 'fire'))}
+          aria-pressed={fireActive}
+          onClick={() => setFireActive((f) => !f)}
         >
           <span aria-hidden="true">🔥</span>
         </button>
