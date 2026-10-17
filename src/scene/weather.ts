@@ -21,6 +21,8 @@ export function buildWeather(qr: QrMatrix): Weather {
   const spread = qr.plot * 0.6;
   const ceiling = qr.plot * 0.85;
 
+  let fireIntensity = 1.0; // 0-1, fades when rain falls on fire
+
   // ---- Rain particles --------------------------------------------------------
   const rainGeo = new THREE.BoxGeometry(0.08, 0.6, 0.08);
   const rainMat = new THREE.MeshBasicMaterial({ 
@@ -70,10 +72,16 @@ export function buildWeather(qr: QrMatrix): Weather {
 
   const update = (dt: number, time: number, visibility: number) => {
     const weatherVisible = visibility > 0.05 && currentType !== 'clear';
+    
+    // Fire intensity fades when rain active, recovers when rain stops
+    const targetIntensity = currentType === 'rain' ? 0 : 1;
+    const fadeSpeed = currentType === 'rain' ? 0.15 : 0.3; // rain kills fire slower than fire returns
+    fireIntensity += (targetIntensity - fireIntensity) * fadeSpeed * dt * 5;
+    
     rainMesh.visible = weatherVisible && currentType === 'rain';
-    fireMesh.visible = weatherVisible && currentType === 'fire';
+    fireMesh.visible = weatherVisible && fireIntensity > 0.02; // fade out completely
 
-    if (!weatherVisible) return;
+    if (!weatherVisible && fireIntensity < 0.05) return;
 
     // Rain update
     if (currentType === 'rain') {
@@ -94,8 +102,8 @@ export function buildWeather(qr: QrMatrix): Weather {
       rainMesh.instanceMatrix.needsUpdate = true;
     }
 
-    // Fire update
-    if (currentType === 'fire') {
+    // Fire update (always runs to allow fade-out)
+    if (fireIntensity > 0.02) {
       for (let i = 0; i < FIRE_COUNT; i++) {
         const o = i * 5;
         fireState[o + 2] += fireState[o + 3] * dt;
@@ -105,9 +113,9 @@ export function buildWeather(qr: QrMatrix): Weather {
           fireState[o + 1] = (rng() - 0.5) * spread * 1.2;
         }
         
-        // Flicker and sway
-        const flicker = Math.sin(time * 8 + fireState[o + 4]) * 0.4 + 1.2; // bigger scale (was 0.3 + 0.7)
-        const sway = Math.sin(time * 2 + fireState[o + 4]) * 0.6; // more sway (was 0.4)
+        // Flicker and sway (modulated by intensity)
+        const flicker = (Math.sin(time * 8 + fireState[o + 4]) * 0.4 + 1.2) * fireIntensity;
+        const sway = Math.sin(time * 2 + fireState[o + 4]) * 0.6 * fireIntensity;
         
         pos.set(
           fireState[o] + sway, 
@@ -116,15 +124,15 @@ export function buildWeather(qr: QrMatrix): Weather {
         );
         scl.setScalar(flicker);
         
-        // Color shift (orange → yellow)
+        // Color shift (orange → yellow) + dim when fading
         const heat = Math.min(fireState[o + 2] / 3, 1);
-        fireColor.setHSL(0.08 - heat * 0.05, 0.9, 0.5 + heat * 0.2);
+        fireColor.setHSL(0.08 - heat * 0.05, 0.9 * fireIntensity, (0.5 + heat * 0.2) * fireIntensity);
         fireMesh.setColorAt(i, fireColor);
         
         fireMatrix.compose(pos, quat.identity(), scl);
         fireMesh.setMatrixAt(i, fireMatrix);
       }
-      fireMat.opacity = visibility;
+      fireMat.opacity = visibility * fireIntensity; // fade with intensity
       fireMesh.instanceMatrix.needsUpdate = true;
       if (fireMesh.instanceColor) fireMesh.instanceColor.needsUpdate = true;
     }
