@@ -419,14 +419,14 @@ export default function App() {
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <span className="modal-icon">⚠️</span>
-              <h3 className="modal-title">Pemberitahuan Resmi</h3>
+              <h3 className="modal-title">PERINGATAN DARURAT NASIONAL</h3>
             </div>
             <p className="modal-message">{modalMessage}</p>
             <button
               className="modal-btn"
               onClick={() => setModalOpen(false)}
             >
-              Mengerti
+              Makzulkan Pemerintah
             </button>
           </div>
         </div>
