@@ -5,7 +5,7 @@ import type { QrMatrix } from './qr';
 export type WeatherType = 'clear' | 'rain' | 'fire';
 
 const RAIN_COUNT = 200;
-const FIRE_COUNT = 120;
+const FIRE_COUNT = 250; // more fire particles (was 120)
 
 export interface Weather {
   group: THREE.Group;
@@ -41,7 +41,7 @@ export function buildWeather(qr: QrMatrix): Weather {
   }
 
   // ---- Fire particles --------------------------------------------------------
-  const fireGeo = new THREE.SphereGeometry(0.3, 6, 6);
+  const fireGeo = new THREE.SphereGeometry(0.6, 8, 8); // bigger sphere (was 0.3)
   const fireMat = new THREE.MeshBasicMaterial({ 
     color: 0xff6622, 
     transparent: true,
@@ -106,8 +106,8 @@ export function buildWeather(qr: QrMatrix): Weather {
         }
         
         // Flicker and sway
-        const flicker = Math.sin(time * 8 + fireState[o + 4]) * 0.3 + 0.7;
-        const sway = Math.sin(time * 2 + fireState[o + 4]) * 0.4;
+        const flicker = Math.sin(time * 8 + fireState[o + 4]) * 0.4 + 1.2; // bigger scale (was 0.3 + 0.7)
+        const sway = Math.sin(time * 2 + fireState[o + 4]) * 0.6; // more sway (was 0.4)
         
         pos.set(
           fireState[o] + sway, 
