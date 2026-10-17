@@ -145,9 +145,9 @@ export function buildWeather(qr: QrMatrix): Weather {
     const rainTargetIntensity = currentType === 'rain' ? 1 : 0;
     rainIntensity += (rainTargetIntensity - rainIntensity) * 0.2 * dt * 5; // 0.2 speed = ~5s fade
     
-    // Rain wet radius: extinguishes fire in expanding patches over 20s
-    if (currentType === 'rain' && rainWetRadius < 1) {
-      rainWetRadius = Math.min(rainWetRadius + dt / 20, 1); // 0-1 over 20s
+    // Rain wet radius: extinguishes fire in expanding patches, but max to current spread radius
+    if (currentType === 'rain' && rainWetRadius < spreadRadius) {
+      rainWetRadius = Math.min(rainWetRadius + dt / 20, spreadRadius); // grow to fire's spread, max 20s
     } else if (currentType !== 'rain') {
       rainWetRadius = 0; // reset when rain off
     }
