@@ -264,19 +264,17 @@ export default function App() {
         {showInfo && (
           <div className="info__card" role="dialog" aria-label="About Magic Tree">
             <p>
-              The plot under the tree <em>is</em> the QR code. Tap it and the canopy
-              settles leaf by leaf into the dark modules.
-            </p>
-            <p>
-              Encoded at error-correction level H, with a clear four-module quiet
-              zone, so the result actually scans.
-            </p>
-            <p>
               Based on{' '}
               <a href="https://github.com/Slifronic/magic-tree" target="_blank" rel="noopener noreferrer">
                 Magic Tree
               </a>
               {' '}by Slifronic. An open-source isometric QR-tree built with React and three.js.
+            </p>
+            <p>
+              Edited version:{' '}
+              <a href="https://github.com/budife/magic-tree-qr" target="_blank" rel="noopener noreferrer">
+                Source
+              </a>
             </p>
           </div>
         )}
