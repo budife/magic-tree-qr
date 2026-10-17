@@ -53,6 +53,46 @@ button { font: inherit; color: inherit; }
   touch-action: manipulation;
 }
 
+/* ---------------------------------------------------------------- weather */
+
+.weather-controls {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-pill);
+  padding: 6px;
+  box-shadow: var(--shadow-soft);
+}
+
+.weather {
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.weather:hover {
+  background: rgba(158, 142, 121, 0.12);
+}
+
+.weather:active {
+  transform: scale(0.95);
+}
+
+.weather[aria-pressed="true"] {
+  background: var(--accent);
+}
+
 /* ------------------------------------------------------------------ brand */
 
 .brand {
