@@ -27,6 +27,8 @@ import {
   BirchIcon,
   PalmIcon,
 } from './ui/icons';
+import './styles.css';
+import './modal.css';
 
 const DEFAULT_URL = 'https://example.com';
 const SEASON_ICONS: Record<SeasonId, () => React.ReactElement> = {
@@ -418,6 +420,24 @@ export default function App() {
             ))}
         </div>
       </div>
+
+      {modalOpen && (
+        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="modal-icon">⚠️</span>
+              <h3 className="modal-title">Pemberitahuan Resmi</h3>
+            </div>
+            <p className="modal-message">{modalMessage}</p>
+            <button
+              className="modal-btn"
+              onClick={() => setModalOpen(false)}
+            >
+              Mengerti
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
