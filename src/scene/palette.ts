@@ -41,11 +41,11 @@ export const SEASONS: Record<SeasonId, Palette> = {
     qrLeaf: ['#5e2340', '#4e1c35', '#6b2b4a'],
     bark: '#8a6a4e',
     barkDark: '#5f4733',
-    hedge: ['#8fbf6a', '#7bad57', '#a2cd7e'],
+    hedge: ['#f4b8cf', '#efa4c2', '#f8cfe0'],
     moduleDark: '#d6d1c4',
     moduleLight: '#fdfbf6',
     slab: '#cfc9bb',
-    ground: '#f6f1e7',
+    ground: '#fce8f2',
   },
   summer: {
     id: 'summer',
@@ -58,7 +58,7 @@ export const SEASONS: Record<SeasonId, Palette> = {
     moduleDark: '#d6d1c4',
     moduleLight: '#fdfbf6',
     slab: '#cfc9bb',
-    ground: '#f6f1e7',
+    ground: '#e8f5e0',
   },
   autumn: {
     id: 'autumn',
@@ -71,7 +71,7 @@ export const SEASONS: Record<SeasonId, Palette> = {
     moduleDark: '#d6d1c4',
     moduleLight: '#fdfbf6',
     slab: '#cfc9bb',
-    ground: '#f6f1e7',
+    ground: '#fef4e6',
   },
 };
 
