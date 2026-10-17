@@ -272,11 +272,11 @@ export default function App() {
               zone, so the result actually scans.
             </p>
             <p>
-              Inspired by{' '}
-              <a href="https://tree.icqr.com" target="_blank" rel="noopener noreferrer">
-                tree.icqr.com
+              Based on{' '}
+              <a href="https://github.com/Slifronic/magic-tree" target="_blank" rel="noopener noreferrer">
+                Magic Tree
               </a>
-              . An open-source take on the isometric QR-tree idea. Built with React and three.js.
+              {' '}by Slifronic. An open-source isometric QR-tree built with React and three.js.
             </p>
           </div>
         )}
