@@ -61,7 +61,7 @@ export default function App() {
     const base = SEASONS[season];
     if (season !== 'spring') return base;
     const swatch = BLOSSOM_SWATCHES.find((s) => s.id === blossom) ?? BLOSSOM_SWATCHES[0];
-    return { ...base, leaf: [...swatch.leaf], qrLeaf: [...swatch.qr] };
+    return { ...base, leaf: [...swatch.leaf], qrLeaf: [...swatch.qr], hedge: [...swatch.hedge] };
   }, [season, blossom]);
 
   // ---- scene lifecycle ---------------------------------------------------
