@@ -114,10 +114,10 @@ function growConifer(seed: number, opts: GrowOptions): TreeModel {
 
   const height = opts.height;
   const trunkR = opts.height * sp.trunkRadius;
-  const whorls = 11;
-  // Palm oil: crown starts much higher (90% up), pine starts at 16%
+  // Palm oil: only 1 crown whorl at very top, pine has full 11 whorls
   const isPalm = sp.id === 'palm';
-  const canopyBase = isPalm ? height * 0.85 : height * 0.16;
+  const whorls = isPalm ? 1 : 11;
+  const canopyBase = isPalm ? height * 0.92 : height * 0.16;
   const baseSpan = isPalm ? height * 0.42 : height * 0.34;
 
   // Trunk, in segments so it can taper.
