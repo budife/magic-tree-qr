@@ -47,12 +47,12 @@ export default function App() {
   const sceneRef = useRef<MagicTreeScene | null>(null);
   const ambienceRef = useRef<Ambience | null>(null);
 
-  const [draft, setDraft] = useState(DEFAULT_URL);
-  const [committed, setCommitted] = useState(DEFAULT_URL);
+  const [draft, setDraft] = useState('');
+  const [committed, setCommitted] = useState('');
   const [season, setSeason] = useState<SeasonId>('summer');
   const [species, setSpecies] = useState<SpeciesId>('oak');
   const [blossom, setBlossom] = useState<BlossomId>('blush');
-  const [mode, setMode] = useState<ViewMode>('tree');
+  const [mode, setMode] = useState<ViewMode>('code');
   const [muted, setMuted] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -117,7 +117,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const t = window.setTimeout(() => setCommitted(draft.trim() || DEFAULT_URL), REBUILD_DELAY);
+    const normalized = draft.trim();
+    // Auto-prepend https:// if missing protocol
+    const withProtocol = normalized && !/^https?:\/\//i.test(normalized)
+      ? `https://${normalized}`
+      : normalized;
+    const t = window.setTimeout(() => setCommitted(withProtocol || DEFAULT_URL), REBUILD_DELAY);
     return () => window.clearTimeout(t);
   }, [draft]);
 
@@ -237,7 +242,7 @@ export default function App() {
             className="field__input"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="https://your-link.com"
+            placeholder="Masukkan link disini (contoh: https://instagram.com/username)"
             aria-label="Link to encode"
             spellCheck={false}
             autoCapitalize="off"
