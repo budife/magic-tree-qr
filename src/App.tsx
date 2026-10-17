@@ -133,12 +133,11 @@ export default function App() {
   }, [species]);
 
   useEffect(() => {
-    // Weather logic: rain suppresses fire, but fireActive persists
-    if (weather === 'rain') {
-      sceneRef.current?.setWeather('rain'); // rain extinguishes fire gradually (visual only)
-      // Fire button stays ON, just intensity fades in 3D
-    } else if (fireActive) {
-      sceneRef.current?.setWeather('fire'); // fire recovers when rain stops
+    // Weather logic: fire and rain can both be active (rain extinguishes fire in zones)
+    if (fireActive) {
+      sceneRef.current?.setWeather('fire'); // fire always active when button ON
+    } else if (weather === 'rain') {
+      sceneRef.current?.setWeather('rain'); // rain without fire
     } else {
       sceneRef.current?.setWeather('clear');
     }
