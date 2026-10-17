@@ -55,41 +55,37 @@ export function buildCanopy(qr: QrMatrix, palette: Palette, species: Species): C
   const fruitScales: number[] = [];
 
   if (species.id === 'palm') {
-    // Oil palm fruits hang at whorl junctions (frond bases) on the trunk
-    const whorls = 3; // matches growConifer palm config
-    const canopyBase = treeHeight * 0.92;
-    fruitCount = whorls * 2; // 2 fruit bunches per whorl
+    // Oil palm fruits hang at frond axils (base of whorl arms)
+    const palmBranches = model.branches.filter(b => b.depth === 2); // whorl arms only
+    fruitCount = Math.min(palmBranches.length, 12); // max 12 fruit bunches
     
     const fruitGeo = new THREE.SphereGeometry(0.5, 8, 6);
     const fruitMat = new THREE.MeshLambertMaterial({ color: 0xffaa33 });
     fruits = new THREE.InstancedMesh(fruitGeo, fruitMat, fruitCount);
     fruits.castShadow = true;
-    fruits.renderOrder = 1; // render after branches/leaves
+    fruits.renderOrder = 1;
     
     const rngFruit = makeRng(seed ^ 0xffa500);
     const mat = new THREE.Matrix4();
     const pos = new THREE.Vector3();
     const scale = new THREE.Vector3();
     
-    for (let w = 0; w < whorls; w++) {
-      const f = w / (whorls - 1);
-      const y = canopyBase + (treeHeight - canopyBase) * f;
+    for (let i = 0; i < fruitCount; i++) {
+      const branch = palmBranches[i];
+      // Fruit hangs at frond base (30% along from start toward trunk)
+      const t = 0.2 + rngFruit() * 0.15;
+      const x = branch.start.x + (branch.end.x - branch.start.x) * t;
+      const y = branch.start.y + (branch.end.y - branch.start.y) * t;
+      const z = branch.start.z + (branch.end.z - branch.start.z) * t;
+      const s = 0.85 + rngFruit() * 0.4;
       
-      // 2 bunches per whorl, opposite sides
-      for (let side = 0; side < 2; side++) {
-        const idx = w * 2 + side;
-        const angle = side * Math.PI + rngFruit() * 0.6;
-        const offset = 0.9 + rngFruit() * 0.3; // closer to trunk (was 1.8+0.8)
-        const s = 1.0 + rngFruit() * 0.5; // bigger (was 0.7+0.4)
-        
-        pos.set(Math.cos(angle) * offset, y - 0.3, Math.sin(angle) * offset);
-        scale.set(s, s * 1.4, s); // more elongated bunch
-        mat.compose(pos, new THREE.Quaternion(), scale);
-        fruits.setMatrixAt(idx, mat);
-        
-        fruitPos.push(pos.x, pos.y, pos.z);
-        fruitScales.push(s);
-      }
+      pos.set(x, y - 0.6, z); // hang below frond base
+      scale.set(s, s * 1.5, s); // elongated bunch
+      mat.compose(pos, new THREE.Quaternion(), scale);
+      fruits.setMatrixAt(i, mat);
+      
+      fruitPos.push(pos.x, pos.y, pos.z);
+      fruitScales.push(s);
     }
     
     fruits.instanceMatrix.needsUpdate = true;
