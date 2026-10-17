@@ -115,8 +115,10 @@ function growConifer(seed: number, opts: GrowOptions): TreeModel {
   const height = opts.height;
   const trunkR = opts.height * sp.trunkRadius;
   const whorls = 11;
-  const canopyBase = height * 0.16;
-  const baseSpan = height * 0.34;
+  // Palm oil: crown starts much higher (90% up), pine starts at 16%
+  const isPalm = sp.id === 'palm';
+  const canopyBase = isPalm ? height * 0.85 : height * 0.16;
+  const baseSpan = isPalm ? height * 0.42 : height * 0.34;
 
   // Trunk, in segments so it can taper.
   const segs = whorls + 1;
@@ -127,7 +129,7 @@ function growConifer(seed: number, opts: GrowOptions): TreeModel {
     branches.push({
       start: new THREE.Vector3(Math.sin(i * 0.7) * lean * 0.06, y0, 0),
       end: new THREE.Vector3(Math.sin((i + 1) * 0.7) * lean * 0.06, y1, 0),
-      radius: trunkR * (1 - (i / segs) * 0.75),
+      radius: trunkR * (1 - (i / segs) * (isPalm ? 0.3 : 0.75)),
       depth: i === 0 ? 0 : 1,
     });
   }
