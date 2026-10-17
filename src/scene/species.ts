@@ -137,10 +137,10 @@ export const SPECIES: Record<SpeciesId, Species> = {
     upBiasHigh: -0.32,         // fronds drooping di crown
     leader: true,
     leafFromDepth: 8,          // daun HANYA di puncak (very deep requirement)
-    leafAlong: [0.02, 0.98],   // spread sepanjang frond
+    leafAlong: [0.65, 1],      // leaves at frond tips only (was 0.02-0.98)
     cluster: [0.68, 1.5],      // frond besar
     clusterYScale: 0.68,       // drooping melengkung
-    leafSize: [0.56, 0.96],
+    leafSize: [0.42, 0.72],    // smaller leaves (was 0.56-0.96)
     taper: 0.78,               // coronet sharp
     bark: { bark: '#8a7a62', barkDark: '#5d5040' },
   },
