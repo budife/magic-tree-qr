@@ -145,7 +145,7 @@ export function buildWeather(qr: QrMatrix): Weather {
     } else if (currentType !== 'fire') {
       fireSpreadTimer = 0; // reset when fire off
     }
-    const spreadRadius = Math.min(fireSpreadTimer / 30, 1); // 0-1 over 30s
+    const spreadRadius = Math.max(0.05, Math.min(fireSpreadTimer / 30, 1)); // 0.05-1 over 30s (start 5%)
     
     // Fast kill timer (when fire disabled, 10s to extinguish)
     if (fireKillTimer > 0) {
